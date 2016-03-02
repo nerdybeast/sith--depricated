@@ -19,3 +19,6 @@ testem.log
 # Sublime Text Settings
 *.sublime-project
 *.sublime-workspace
+
+# User specific IDE settings
+.editorconfig
