@@ -6,6 +6,7 @@
     "ember-cli-test-loader": "0.2.2",
     "ember-qunit-notifications": "0.1.0",
     "auth0-lock": "^7.10.2",
-    "jsrsasign": "^5.0.1"
+    "jsrsasign": "^5.0.1",
+    "bootstrap": "^3.3.6"
   }
 }

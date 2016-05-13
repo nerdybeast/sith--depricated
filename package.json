@@ -12,14 +12,18 @@
     "start": "ember server",
     "test": "ember test"
   },
-  "repository": "",
-  "engines": {
-    "node": ">= 0.10.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nerdybeast/sith"
   },
-  "author": "",
+  "engines": {
+    "node": "4.4.1"
+  },
+  "author": "nerdy beast",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.2.0",
+    "broccoli-funnel": "^1.0.1",
     "ember-ajax": "0.7.1",
     "ember-cli": "2.4.0",
     "ember-cli-app-version": "^1.0.0",

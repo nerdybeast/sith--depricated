@@ -22,3 +22,6 @@ testem.log
 
 # User specific IDE settings
 .editorconfig
+
+# Visual Studio Code Settings
+.vscode
