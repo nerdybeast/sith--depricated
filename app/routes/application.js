@@ -11,7 +11,11 @@ export default Ember.Route.extend(ApplicationRouteMixin, {
 				authParams: { scope: 'openid'}
 			};
 
-			//this.get('session').authenticate('simple-auth-authenticator:lock', lockOptions);
+			/**
+			 * We are using our own custom authenticator here because we need to extract data from the authentication responses.
+			 * This replaces the default Auth0 authenticator which is used by stating:
+			 * this.get('session').authenticate('simple-auth-authenticator:lock', lockOptions);
+			 */
 			this.get('session').authenticate('authenticator:sith-custom', lockOptions);
 		},
 

@@ -32,7 +32,7 @@ module.exports = function(environment) {
 		ENV.APP.rootElement = '#ember-testing';
 	}
 
-	if(environment === 'localhost') {
+	if(environment === 'localhost' || environment === 'local') {
 		ENV.APP.apiDomain = 'http://localhost:5000';
 	}
 
