@@ -5,7 +5,17 @@ var Funnel = require('broccoli-funnel');
 module.exports = function(defaults) {
 
 	var app = new EmberApp(defaults, {
-		// Add options here
+		
+		//We are using an ember addon called "ember-cli-dotenv" that is an ember-friendly version of the
+		//"dotenv" node package. This addon automatically imports the ".env" file in this project so that
+		//we can pull in information we dont want stored in git.
+		dotEnv: {
+			
+			//This property determines which keys we be pulled from the ".env" file. 
+			clientAllowedKeys: [
+				'AUTH0_CLIENT_ID'
+			]
+		}
 	});
 
 	//app.import('bower_components/bootstrap/dist/css/bootstrap.min.css');

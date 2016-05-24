@@ -1,12 +1,29 @@
-{{class-stats classes=model.classes}}
-
 <div>
-    Number of test classes (best guess): {{testClasses.length}}
+    
+    {{class-stats classes=model.classes}}
+
+    <div>Number of test classes (best guess): {{testClasses.length}}</div>
+
+    <div>
+        <!--Direct access of a controller proeprty-->
+        Current Api Version: {{currentOrgVersion}}
+    </div>
 </div>
-
-<div>
-    <!--Direct access of a controller proeprty-->
-    Current Api Version: {{currentOrgVersion}}
+<br />
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Test Classes
+        <button class="btn btn-success" {{action "startTestRun"}}>Run</button>
+    </div>
+    <ul class="list-group">
+    {{#each testClasses as |class|}}
+        <li class="list-group-item">
+            <span class="badge">v{{class.apiVersion}}</span>
+            {{input type="checkbox" checked=class.selected}}
+            {{class.name}}
+        </li>
+    {{/each}}
+    </ul>
 </div>
 
 {{outlet}}

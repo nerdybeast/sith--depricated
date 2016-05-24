@@ -62,8 +62,11 @@ module.exports = function(environment) {
 	};
 
 	ENV['auth0-ember-simple-auth'] = {
-	  	clientID: "aaCGzBtEetwZP3J0psnVh2iWDvoISdkW",
-	  	domain: "sith-oath.auth0.com"
+		domain: "sith-oath.auth0.com",
+		
+		//This property is found in the ".env" file for this project.
+		//See the "ember-cli-build.js" file for the "dotEnv" setup.
+		clientID: process.env.AUTH0_CLIENT_ID
 	};
 
 	ENV['contentSecurityPolicy'] = {

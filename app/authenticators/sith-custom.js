@@ -14,10 +14,15 @@ let setHeaders = function(auth) {
 		let enterprise = auth.profile.urls.enterprise;
 	    let instanceUrl = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
 
-	    jqXHR.setRequestHeader('sessionid', auth.profile.identities[0].access_token);
-        jqXHR.setRequestHeader('accesstoken', auth.accessToken);
-	    jqXHR.setRequestHeader('authorization', `Bearer ${auth.jwt}`);
-	    jqXHR.setRequestHeader('instanceurl', instanceUrl);
+	    jqXHR.setRequestHeader('sessionId', auth.profile.identities[0].access_token);
+        jqXHR.setRequestHeader('accessToken', auth.accessToken);
+	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
+	    jqXHR.setRequestHeader('instanceUrl', instanceUrl);
+        
+        //Setting the default global Accept header to request json api docs. This can be ovverriden
+        //on a call to call basis by simply setting the Accept header. This will be useful in cases
+        //when we want simple json.
+        jqXHR.setRequestHeader('Accept', 'application/vnd.api+json');
 	});
 };
 

@@ -25,3 +25,6 @@ testem.log
 
 # Visual Studio Code Settings
 .vscode
+
+# This file will store keys, ids, usernames, passwords, etc. that we don't want in git.
+.env

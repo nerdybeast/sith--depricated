@@ -11,5 +11,7 @@ export default DS.Model.extend({
     lengthWithoutComments: DS.attr('number'), 
     name: DS.attr('string'),
     namespacePrefix: DS.attr('string'),
-    status: DS.attr('string')
+    status: DS.attr('string'),
+    
+    selected: null
 });
