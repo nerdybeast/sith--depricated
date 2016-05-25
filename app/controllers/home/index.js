@@ -3,6 +3,24 @@ import config from 'sith/config/environment';
 
 export default Ember.Controller.extend({
     
+    io: Ember.inject.service('socket-io'),
+	
+	//Default ember hook that we are overriding to instantiate sokct.io
+	//See: http://emberjs.com/api/classes/Ember.Controller.html#method_init
+	init: function() {
+		this._super(...arguments);
+		
+		//Because our socket is running on the same server as our api, we only need to provide the domain and socket.io figures out the rest.
+        let socket = this.get('io').socketFor(`${config.APP.apiDomain}/`);
+		
+        //Will fire when we make a connection to the socket.io instance running on the server.
+		socket.on('connect', () => {
+			console.info('Socket connected!');
+			
+            socket.on('debug-from-server', this.onDebugFromServer);
+		});
+	},
+    
     //Inject the controllers/home.js into this controller.
     homeController: Ember.inject.controller('home'),
     
@@ -41,22 +59,30 @@ export default Ember.Controller.extend({
                 method: 'POST',
                 url: `${config.APP.apiDomain}/api/run-tests`,
                 headers: {
-                    
                     //Tell the api that we want a traditional json response instead of a json api doc.
                     'Accept': 'application/json',
                     
+                    //Tell the api that we are sending standard json in the body of this request.
                     'Content-Type': 'application/json'
                 },
                 data: JSON.stringify({ data })
             }).done((response) => {
+                
                 response.forEach((item) => {
+                     
+                    item.apexClass = this.store.peekRecord('class', item.apexClassId);
                     this.store.createRecord('apex-test-queue-item', item);
                 });
+                
             }).fail(function(data) {
                 console.error(data);
             }).always(function() {
                 
             });
         }
+    },
+    
+    onDebugFromServer: function(data) {
+        console.info('onDebugFromServer =>', data);
     }
 });

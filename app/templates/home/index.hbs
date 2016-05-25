@@ -12,7 +12,7 @@
 <br />
 <div class="panel panel-default">
     <div class="panel-heading">
-        Test Classes
+        Test Classes Containing Apex Analytics
         <button class="btn btn-success" {{action "startTestRun"}}>Run</button>
     </div>
     <ul class="list-group">
@@ -20,7 +20,11 @@
         <li class="list-group-item">
             <span class="badge">v{{class.apiVersion}}</span>
             {{input type="checkbox" checked=class.selected}}
-            {{class.name}}
+            {{class.name}} 
+            
+            {{#if class.testRunStatus}}
+                &nbsp;({{class.testRunStatus}})
+            {{/if}}
         </li>
     {{/each}}
     </ul>

@@ -6,5 +6,7 @@ export default DS.Model.extend({
     createdDate: DS.attr('date'),
     extendedStatus: DS.attr('string'),
     parentJobId: DS.attr('string'),
-    status: DS.attr('string')
+    status: DS.attr('string'),
+    
+    apexClass: DS.belongsTo('class')
 });
