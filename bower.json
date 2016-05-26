@@ -10,6 +10,7 @@
     "bootstrap": "^3.3.6",
     "ember-simple-auth": "0.8.0",
     "uri.js": "^1.18.0",
-    "socket.io-client": "^1.4.6"
+    "socket.io-client": "^1.4.6",
+    "bootswatch": "3.3.6"
   }
 }

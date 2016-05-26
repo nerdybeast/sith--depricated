@@ -1,0 +1,10 @@
+<div>
+    <h3>An Error Has Occurred</h3>
+    <h4>{{model.message}}</h4>
+
+    {{#each model.errors as |error|}}
+    <p>
+        {{error.title}}
+    </p>
+    {{/each}}
+</div>

@@ -47,5 +47,6 @@
     "ember-simple-auth": "1.1.0",
     "ember-websockets": "3.0.0",
     "loader.js": "^4.0.0"
-  }
+  },
+  "dependencies": {}
 }
