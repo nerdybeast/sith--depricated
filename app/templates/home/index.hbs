@@ -1,5 +1,5 @@
 <div>
-    
+
     {{class-stats classes=model.classes}}
 
     <div>Number of test classes (best guess): {{testClasses.length}}</div>
@@ -19,12 +19,17 @@
     {{#each testClasses as |class|}}
         <li class="list-group-item">
             <span class="badge">v{{class.apiVersion}}</span>
-            {{input type="checkbox" checked=class.selected}}
-            {{class.name}} 
-            
-            {{#if class.testRunStatus}}
-                &nbsp;({{class.testRunStatus}})
+            {{input type="checkbox" checked=class.selected}} {{class.name}}
+
+            {{#if class.currentQueueItem.status}}
+                &nbsp;({{class.currentQueueItem.status}})
             {{/if}}
+
+            <ul>
+                {{#each class.apexTestResults as |testResult|}}
+                <li>{{testResult.methodName}} - {{testResult.outcome}}</li>
+                {{/each}}
+            </ul>
         </li>
     {{/each}}
     </ul>

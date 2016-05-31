@@ -7,6 +7,8 @@ export default DS.Model.extend({
     extendedStatus: DS.attr('string'),
     parentJobId: DS.attr('string'),
     status: DS.attr('string'),
-    
-    apexClass: DS.belongsTo('class')
+
+    apexClass: DS.belongsTo('class'),
+    parentJob: DS.belongsTo('async-apex-job'),
+    apexTestResults: DS.hasMany('apex-test-result')
 });
