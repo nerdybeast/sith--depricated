@@ -14,6 +14,7 @@
     <div class="panel-heading">
         Test Classes Containing Apex Analytics
         <button class="btn btn-success" {{action "startTestRun"}}>Run</button>
+        {{if loadingTestRun " loading..."}}
     </div>
     <ul class="list-group">
     {{#each testClasses as |class|}}

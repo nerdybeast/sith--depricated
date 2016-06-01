@@ -19,7 +19,7 @@ export default Ember.Controller.extend({
 
             socket.on('debug-from-server', this.onDebugFromServer, this);
             socket.on('test-status', this.onTestStatus, this);
-            socket.on('test-result', this.onTestResult, this);
+            socket.on('records-update', this.onRecordsUpdate, this);
 		});
 	},
 
@@ -36,8 +36,11 @@ export default Ember.Controller.extend({
     //A simple filter to show all test classes.
     testClasses: Ember.computed.filterBy('model.classes', 'isTestClass', true),
 
-    //
+    //A simple filter that holds all of the classes that have been selected for a test run.
     selectedForTestRun: Ember.computed.filterBy('model.classes', 'selected', true),
+
+    //
+    loadingTestRun: false,
 
     actions: {
 
@@ -57,12 +60,14 @@ export default Ember.Controller.extend({
                 classIds: classes.mapBy('id')
             };
 
+            this.toggleProperty('loadingTestRun');
+
             Ember.$.ajax({
                 method: 'POST',
                 url: `${config.APP.apiDomain}/api/run-tests`,
                 headers: {
                     //Tell the api that we want a traditional json response instead of a json api doc.
-                    'Accept': 'application/json',
+                    'Accept': 'application/vnd.api+json',
 
                     //Tell the api that we are sending standard json in the body of this request.
                     'Content-Type': 'application/json'
@@ -70,77 +75,64 @@ export default Ember.Controller.extend({
                 data: JSON.stringify({ data })
             }).done((response) => {
 
-                response.forEach((item) => {
+                /**
+                 * Using .pushPayload() here instead of .push() because the response here is in a traditional json api doc format and the push method
+                 * requires data to be in a slightly altered format. pushPayload here will use the default application serializer (serializers/application.js)
+                 * to put this data in the store without having to manipulate here on the fly or change our api to return a non-standard json api doc.
+                 */
+                this.store.pushPayload(response);
 
-                    item.apexClass = this.store.peekRecord('class', item.apexClassId);
-
-                    //TODO: Switch this to use .push because this record already exists on the backend, this is not a new
-                    //record that is being created on the client side that needs to be pushed to the backend.
-                    this.store.createRecord('apex-test-queue-item', item);
+                this.store.peekAll('apex-test-queue-item').forEach(record => {
+                    record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+                    //This async-apex-job record will have just been loaded into the store in the .pushPayload() call above.
+                    record.set('parentJob', this.store.peekRecord('async-apex-job', record.get('parentJobId')));
                 });
 
-            }).fail(function(data) {
-                console.error(data);
-            }).always(function() {
+                this.store.peekAll('async-apex-job').forEach(record => {
+                    record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+                });
 
+            }).fail((data) => {
+                console.error(data);
+            }).always(() => {
+                this.toggleProperty('loadingTestRun');
             });
         }
     },
 
-    onDebugFromServer: function(msg) {
+    onDebugFromServer(msg) {
         console.info('onDebugFromServer =>', msg);
     },
 
     //TODO: The logic in this method needs to be moved to either the api or a reuseable method.
-    onTestStatus: function(msg) {
+    onTestStatus(msg) {
         console.info('onTestStatus =>', msg);
 
         let type = msg.sobjectType.dasherize();
 
-        let data = msg.records.map((record) => {
-
-            let id = record.id;
-
-            delete record.id;
-            delete record.attributes;
-
-            //Building a json api doc
-            return { id, type, attributes: record };
+        let data = msg.records.map(record => {
+            return this.basicJsonApiDocFromSobject(type, record);
         });
 
         this.store.push({ data });
     },
 
-    onTestResult: function(msg) {
-        console.info('onTestResult =>', msg);
-
-        let records = msg.records || [];
-        if(records.length === 0) { return; }
-
-        let type = msg.sobjectType.dasherize();
-
-        //Gather a unique list of apex log ids so we can fetch these records.
-        //Note: Keep in mind this will not be the contents of the debug lob, simply the Salesforce record about the log.
-        // let apexLogIds = records.mapBy('apexClassId').uniq();
-        //
-        // this.store.query('apex-log', { ids: apexLogIds }).then((res) => {
-        //     console.info(res);
-        // });
-
-        let data = records.map((record) => {
-
-            let id = record.id;
-
-            delete record.id;
-            delete record.attributes;
-
-            //Building a json api doc
-            return { id, type, attributes: record };
-        });
-
-        this.store.push({ data }).forEach((record) => {
+    /**
+     *
+     * @param  {object} data - This is expected to be a standard json api document.
+     * @return {void}
+     */
+    onRecordsUpdate(data) {
+        this.store.push(data).forEach((record) => {
             record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
             record.set('queueItem', this.store.peekRecord('apex-test-queue-item', record.get('queueItemId')));
         });
+    },
+
+    basicJsonApiDocFromSobject(type, record) {
+        let id = record.id;
+        delete record.id;
+        delete record.attributes;
+        return { id, type, attributes: record };
     }
 });

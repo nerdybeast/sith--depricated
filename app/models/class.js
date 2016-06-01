@@ -31,20 +31,8 @@ export default DS.Model.extend({
     }),
 
     //
-    queueItemStatus: Ember.computed.alias('currentQueueItem.status'),
+    //queueItemStatus: Ember.computed.alias('currentQueueItem.status'),
 
     apexTestResults: Ember.computed.alias('currentQueueItem.apexTestResults.[]')
-
-    //@each will not only observe the apexTestQueueItems array but will also fire if any property on any item
-    //in that array changes. We need this because we want to observe the status property on the apex-test-queue-item.
-    // testRunStatus: Ember.computed('apexTestQueueItems.@each.status', function() {
-    //
-    //     //The default ember sortBy only sorts in ASC order.
-    //     let items = this.get('apexTestQueueItems').sortBy('createdDate');
-    //
-    //     //Grab the last queue item since it will be the most recent one.
-    //     return items.get('lastObject.status');
-    // }),
-
-
+    
 });
