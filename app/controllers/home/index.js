@@ -23,6 +23,7 @@ export default Ember.Controller.extend({
             socket.on('debug-from-server', this.onDebugFromServer, this);
             socket.on('test-status', this.onTestStatus, this);
             socket.on('process-test-results', this.onProcessTestResults, this);
+            socket.on('analytics', this.onAnalytics, this);
 		});
 	},
 
@@ -41,6 +42,9 @@ export default Ember.Controller.extend({
 
     //
     loadingTestRun: false,
+
+    //
+    //analytics: Ember.A(),
 
     actions: {
 
@@ -83,8 +87,14 @@ export default Ember.Controller.extend({
                  */
                 this.store.pushPayload(response);
 
+                /**
+                 * TODO: Need to rethink how to create these relationships without looping through ALL the records in the store.
+                 * This is really inefficient and could be cleaned up.
+                 */
                 this.store.peekAll('apex-test-queue-item').forEach(record => {
+
                     record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+
                     //This async-apex-job record will have just been loaded into the store in the .pushPayload() call above.
                     record.set('parentJob', this.store.peekRecord('async-apex-job', record.get('parentJobId')));
                 });
@@ -137,6 +147,28 @@ export default Ember.Controller.extend({
 
         this.store.peekAll('async-apex-job').forEach(record => {
             record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+        });
+    },
+
+    onAnalytics(data) {
+        console.info('onAnalytics =>', data);
+        //this.get('analytics').pushObjects(data);
+
+        let apexTestResults = this.store.peekAll('apex-test-result');
+
+        data.forEach(analytic => {
+
+            let apexTestResultsByScope = apexTestResults.filterBy('methodName', analytic.scope) || Ember.A();
+
+            let apexTestResult = apexTestResultsByScope.length > 0 ? apexTestResultsByScope.sortBy('testTimestamp').get('lastObject') : null;
+
+            this.store.createRecord('analytic', {
+                className: analytic.className,
+                executionTime: analytic.executionTime,
+                isTest: analytic.isTest,
+                scope: analytic.scope,
+                apexTestResult
+            });
         });
     },
 

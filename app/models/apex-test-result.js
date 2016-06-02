@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import DS from 'ember-data';
 
 export default DS.Model.extend({
@@ -20,4 +21,10 @@ export default DS.Model.extend({
 
     //Will be available in version 37
     //apexTestRunResult: DS.belongsTo('apex-test-run-result')
+
+    analytics: DS.hasMany('analytic'),
+
+    currentAnalytic: Ember.computed('analytics.[]', function() {
+        return this.get('analytics').sortBy('createdDate').get('lastObject');
+    })
 });

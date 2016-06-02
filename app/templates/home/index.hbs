@@ -28,7 +28,15 @@
 
             <ul>
                 {{#each class.apexTestResults as |testResult|}}
-                <li>{{testResult.methodName}} - {{testResult.outcome}}</li>
+                <li>
+                    {{testResult.methodName}} - {{testResult.outcome}}
+
+                    {{#if testResult.currentAnalytic}}
+                        <ul>
+                            <li>Execution Time: {{testResult.currentAnalytic.executionTime}}</li>
+                        </ul>
+                    {{/if}}
+                </li>
                 {{/each}}
             </ul>
         </li>
