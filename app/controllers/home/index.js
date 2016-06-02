@@ -5,6 +5,9 @@ export default Ember.Controller.extend({
 
     io: Ember.inject.service('socket-io'),
 
+    //Inject the controllers/home.js into this controller.
+    homeController: Ember.inject.controller('home'),
+
 	//Default ember hook that we are overriding to instantiate sokct.io
 	//See: http://emberjs.com/api/classes/Ember.Controller.html#method_init
 	init: function() {
@@ -19,12 +22,9 @@ export default Ember.Controller.extend({
 
             socket.on('debug-from-server', this.onDebugFromServer, this);
             socket.on('test-status', this.onTestStatus, this);
-            socket.on('records-update', this.onRecordsUpdate, this);
+            socket.on('process-test-results', this.onProcessTestResults, this);
 		});
 	},
-
-    //Inject the controllers/home.js into this controller.
-    homeController: Ember.inject.controller('home'),
 
     //Our api adds an "id" property to the api versions response from Salesforce and we simply copy the version number
     //to the id field (this makes ember data happy) and we get an integer value for the version instead of a string value returned by salesforce.
@@ -66,7 +66,8 @@ export default Ember.Controller.extend({
                 method: 'POST',
                 url: `${config.APP.apiDomain}/api/run-tests`,
                 headers: {
-                    //Tell the api that we want a traditional json response instead of a json api doc.
+
+                    //Tell the api that we want a json api doc response instead of a traditional json response.
                     'Accept': 'application/vnd.api+json',
 
                     //Tell the api that we are sending standard json in the body of this request.
@@ -122,10 +123,20 @@ export default Ember.Controller.extend({
      * @param  {object} data - This is expected to be a standard json api document.
      * @return {void}
      */
-    onRecordsUpdate(data) {
-        this.store.push(data).forEach((record) => {
+    onProcessTestResults(data) {
+
+        console.info('onProcessTestResults =>', data);
+
+        this.store.pushPayload(data);
+
+        this.store.peekAll('apex-test-result').forEach(record => {
             record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+            record.set('asyncApexJob', this.store.peekRecord('async-apex-job', record.get('asyncApexJobId')));
             record.set('queueItem', this.store.peekRecord('apex-test-queue-item', record.get('queueItemId')));
+        });
+
+        this.store.peekAll('async-apex-job').forEach(record => {
+            record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
         });
     },
 
