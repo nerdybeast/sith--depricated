@@ -2,10 +2,10 @@
 
     {{class-stats classes=model.classes}}
 
-    <div>Number of test classes (best guess): {{testClasses.length}}</div>
+    <div>Number of test classes containing Analytics.cls declarations (best guess): {{testClasses.length}}</div>
 
     <!--Direct access of a controller proeprty-->
-    <div>Current Api Version: {{currentOrgVersion}}</div>
+    <div>Current Org Api Version: {{currentMaxOrgVersion}} (lowest supported version is {{currentMinOrgVersion}})</div>
 
     <div>Daily Api Limit Usage: {{dailyApiUsage}}</div>
 </div>

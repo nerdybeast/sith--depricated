@@ -32,7 +32,10 @@ export default Ember.Controller.extend({
     orgVersions: Ember.computed.mapBy('model.apiVersions', 'id'),
 
     //"orgVersions" will be an array of integers, this simply grabs the largest one.
-    currentOrgVersion: Ember.computed.max('orgVersions'),
+    currentMaxOrgVersion: Ember.computed.max('orgVersions'),
+
+    //"orgVersions" will be an array of integers, this simply grabs the smallest one.
+    currentMinOrgVersion: Ember.computed.min('orgVersions'),
 
     //A simple filter to show all test classes.
     testClasses: Ember.computed.filterBy('model.classes', 'isTestClass', true),
