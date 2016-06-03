@@ -44,7 +44,12 @@ export default Ember.Controller.extend({
     loadingTestRun: false,
 
     //
-    //analytics: Ember.A(),
+    dailyApiUsage: Ember.computed('model.orgLimits.DailyApiRequests.{Max,Remaining}', function() {
+        let dailyApiRequests = this.get('model.orgLimits.DailyApiRequests');
+        let used = dailyApiRequests.Max - dailyApiRequests.Remaining;
+        let percentageUsed = Number(Math.round((used / dailyApiRequests.Max) + "e+2")  + "e-2") * 100;
+        return `${percentageUsed}% (${used}/${dailyApiRequests.Max})`;
+    }),
 
     actions: {
 
@@ -150,25 +155,21 @@ export default Ember.Controller.extend({
         });
     },
 
-    onAnalytics(data) {
-        console.info('onAnalytics =>', data);
-        //this.get('analytics').pushObjects(data);
+    onAnalytics(msg) {
+        console.info('onAnalytics =>', msg);
 
         let apexTestResults = this.store.peekAll('apex-test-result');
 
-        data.forEach(analytic => {
+        msg.analytics.forEach(analytic => {
 
-            let apexTestResultsByScope = apexTestResults.filterBy('methodName', analytic.scope) || Ember.A();
-
-            let apexTestResult = apexTestResultsByScope.length > 0 ? apexTestResultsByScope.sortBy('testTimestamp').get('lastObject') : null;
-
-            this.store.createRecord('analytic', {
-                className: analytic.className,
-                executionTime: analytic.executionTime,
-                isTest: analytic.isTest,
-                scope: analytic.scope,
-                apexTestResult
+            let apexTestResult = apexTestResults.find(testResult => {
+                return testResult.get('methodName') === analytic.scope && testResult.get('apexLogId') === msg.debugLogId;
             });
+
+            //Tack on the associated ApexTextResult record.
+            analytic.apexTestResult = apexTestResult;
+
+            this.store.createRecord('analytic', analytic);
         });
     },
 

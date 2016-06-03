@@ -4,10 +4,10 @@
 
     <div>Number of test classes (best guess): {{testClasses.length}}</div>
 
-    <div>
-        <!--Direct access of a controller proeprty-->
-        Current Api Version: {{currentOrgVersion}}
-    </div>
+    <!--Direct access of a controller proeprty-->
+    <div>Current Api Version: {{currentOrgVersion}}</div>
+
+    <div>Daily Api Limit Usage: {{dailyApiUsage}}</div>
 </div>
 <br />
 <div class="panel panel-default">
@@ -29,11 +29,15 @@
             <ul>
                 {{#each class.apexTestResults as |testResult|}}
                 <li>
-                    {{testResult.methodName}} - {{testResult.outcome}}
+                    {{testResult.methodName}} - <strong>{{testResult.outcome}}</strong>
 
                     {{#if testResult.currentAnalytic}}
                         <ul>
-                            <li>Execution Time: {{testResult.currentAnalytic.executionTime}}</li>
+                            <li>Execution Time: <strong>{{testResult.currentAnalytic.executionTime}} ms</strong></li>
+                            <li>DML Statements: <strong>{{testResult.currentAnalytic.limits.dMLStatements}} ({{testResult.currentAnalytic.limits.dmlRows}} rows)</strong></li>
+                            <li>SOQL Queries: <strong>{{testResult.currentAnalytic.limits.queries}} ({{testResult.currentAnalytic.limits.queryRows}} rows)</strong></li>
+                            <li>SOSL Queries: <strong>{{testResult.currentAnalytic.limits.soslQueries}}</strong></li>
+                            <li>Memory Used: <strong>{{testResult.currentAnalytic.limits.heapSize}} bytes</strong></li>
                         </ul>
                     {{/if}}
                 </li>
