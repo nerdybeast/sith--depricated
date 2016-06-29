@@ -22,6 +22,7 @@ export default DS.Model.extend({
     //Will be available in version 37
     //apexTestRunResult: DS.belongsTo('apex-test-run-result')
 
+    //This list of analytics will be those whos "scope" property matches the "methodName" property on this model.
     analytics: DS.hasMany('analytic'),
 
     currentAnalytic: Ember.computed('analytics.[]', function() {

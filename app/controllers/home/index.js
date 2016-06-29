@@ -10,8 +10,8 @@ export default Ember.Controller.extend({
 
 	//Default ember hook that we are overriding to instantiate sokct.io
 	//See: http://emberjs.com/api/classes/Ember.Controller.html#method_init
-	init: function() {
-		this._super(...arguments);
+    init: function() {
+        this._super(...arguments);
 
 		//Because our socket is running on the same server as our api, we only need to provide the domain and socket.io figures out the rest.
         let socket = this.get('io').socketFor(`${config.APP.apiDomain}/`);
@@ -25,6 +25,10 @@ export default Ember.Controller.extend({
             socket.on('process-test-results', this.onProcessTestResults, this);
             socket.on('analytics', this.onAnalytics, this);
 		});
+
+        socket.on('disconnect', () => {
+            console.info('Socket disconnect from server.');
+        });
 	},
 
     //Our api adds an "id" property to the api versions response from Salesforce and we simply copy the version number
@@ -149,6 +153,7 @@ export default Ember.Controller.extend({
 
         this.store.peekAll('apex-test-result').forEach(record => {
             record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+            record.set('apexLog', this.store.peekRecord('apex-log', record.get('apexLogId')));
             record.set('asyncApexJob', this.store.peekRecord('async-apex-job', record.get('asyncApexJobId')));
             record.set('queueItem', this.store.peekRecord('apex-test-queue-item', record.get('queueItemId')));
         });
@@ -162,15 +167,19 @@ export default Ember.Controller.extend({
         console.info('onAnalytics =>', msg);
 
         let apexTestResults = this.store.peekAll('apex-test-result');
+        let classes = this.store.peekAll('class');
 
         msg.analytics.forEach(analytic => {
 
             let apexTestResult = apexTestResults.find(testResult => {
-                return testResult.get('methodName') === analytic.scope && testResult.get('apexLogId') === msg.debugLogId;
+                return testResult.get('methodName').toLowerCase() === analytic.scope.toLowerCase() && testResult.get('apexLogId') === msg.debugLogId;
             });
 
-            //Tack on the associated ApexTextResult record.
+            let apexClass = classes.find(aClass => analytic.className.toLowerCase() === aClass.get('name').toLowerCase());
+
+            //Tack on the associated ApexTextResult & ApexClass records.
             analytic.apexTestResult = apexTestResult;
+            analytic.class = apexClass;
 
             this.store.createRecord('analytic', analytic);
         });

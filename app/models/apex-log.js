@@ -1,5 +1,6 @@
 import DS from 'ember-data';
 
+//https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_apexlog.htm
 export default DS.Model.extend({
     application: DS.attr('string'),
     durationMilliseconds: DS.attr('number'),
@@ -9,5 +10,7 @@ export default DS.Model.extend({
     operation: DS.attr('string'),
     request: DS.attr('string'),
     startTime: DS.attr('date'),
-    status: DS.attr('string')
+    status: DS.attr('string'),
+
+    apexTestResults: DS.hasMany('apex-test-result')
 });

@@ -13,6 +13,7 @@ export default DS.Model.extend({
     limits: DS.attr(),
     parameters: DS.attr(),
 
+    class: DS.belongsTo('class'),
     apexTestResult: DS.belongsTo('apex-test-result'),
 
     createdDate: new Date()

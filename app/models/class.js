@@ -16,6 +16,7 @@ export default DS.Model.extend({
 
     apexTestQueueItems: DS.hasMany('apex-test-queue-item'),
     asyncApexJobs: DS.hasMany('async-apex-job'),
+    analytics: DS.hasMany('analytics'),
 
     //Will be set to true if the current class has been selected for a test run.
     selected: null,
@@ -23,16 +24,10 @@ export default DS.Model.extend({
     //Will only fire if the length of the apexTestQueueItems array changes.
     currentQueueItem: Ember.computed('apexTestQueueItems.[]', function() {
 
-        //The default ember sortBy only sorts in ASC order.
-        let items = this.get('apexTestQueueItems').sortBy('createdDate');
-
-        //Grab the last queue item since it will be the most recent one.
-        return items.get('lastObject');
+        //The default ember sortBy only sorts in ASC order, grab the last queue item since it will be the most recent one.
+        return this.get('apexTestQueueItems').sortBy('createdDate').get('lastObject');
     }),
 
-    //
-    //queueItemStatus: Ember.computed.alias('currentQueueItem.status'),
-
+    //Simple alias to all of the apex test results for the current class.
     apexTestResults: Ember.computed.alias('currentQueueItem.apexTestResults.[]')
-    
 });
