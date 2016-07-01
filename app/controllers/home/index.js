@@ -1,35 +1,63 @@
 import Ember from 'ember';
 import config from 'sith/config/environment';
 
+const apiDomain = config.APP.apiDomain;
+
 export default Ember.Controller.extend({
 
+    //Inject the socket.io service into this controller.
     io: Ember.inject.service('socket-io'),
 
     //Inject the controllers/home.js into this controller.
     homeController: Ember.inject.controller('home'),
 
+    //Alias the default socket.io namespace which is simply: '/'
+    //See: http://socket.io/docs/server-api/#server#sockets:namespace
+    mainSocket: Ember.computed('io', function() {
+
+        //Because our socket is running on the same server as our api, we only need to provide the domain and socket.io figures out the rest.
+        return this.get('io').socketFor(`${apiDomain}/`);
+    }),
+
 	//Default ember hook that we are overriding to instantiate sokct.io
 	//See: http://emberjs.com/api/classes/Ember.Controller.html#method_init
-    init: function() {
+    init() {
+
+        //Make sure Ember is able to do important setup work (if any);
         this._super(...arguments);
 
-		//Because our socket is running on the same server as our api, we only need to provide the domain and socket.io figures out the rest.
-        let socket = this.get('io').socketFor(`${config.APP.apiDomain}/`);
+        let socket = this.get('mainSocket');
 
         //Will fire when we make a connection to the socket.io instance running on the server.
 		socket.on('connect', () => {
 			console.info('Socket connected!');
 
-            socket.on('debug-from-server', this.onDebugFromServer, this);
-            socket.on('test-status', this.onTestStatus, this);
-            socket.on('process-test-results', this.onProcessTestResults, this);
-            socket.on('analytics', this.onAnalytics, this);
+            socket.emit('hand-shake', this.get('homeController.profile.username'), (socketId) => {
+                console.log(socketId);
+            });
+
 		});
 
         socket.on('disconnect', () => {
             console.info('Socket disconnect from server.');
         });
+
+        socket.on('debug-from-server', this.onDebugFromServer, this);
+        socket.on('test-status', this.onTestStatus, this);
+        socket.on('process-test-results', this.onProcessTestResults, this);
+        socket.on('analytics', this.onAnalytics, this);
 	},
+
+    willDestroy() {
+
+        //TODO: Figure out why this is not working...
+        //https://github.com/thoov/ember-websockets/issues/77
+        let socket = this.get('mainSocket');
+        socket.off('debug-from-server', this.onDebugFromServer);
+        socket.off('test-status', this.onTestStatus);
+        socket.off('process-test-results', this.onProcessTestResults);
+        socket.off('analytics', this.onAnalytics);
+    },
 
     //Our api adds an "id" property to the api versions response from Salesforce and we simply copy the version number
     //to the id field (this makes ember data happy) and we get an integer value for the version instead of a string value returned by salesforce.
@@ -49,14 +77,6 @@ export default Ember.Controller.extend({
 
     //
     loadingTestRun: false,
-
-    //
-    dailyApiUsage: Ember.computed('model.orgLimits.DailyApiRequests.{Max,Remaining}', function() {
-        let dailyApiRequests = this.get('model.orgLimits.DailyApiRequests');
-        let used = dailyApiRequests.Max - dailyApiRequests.Remaining;
-        let percentageUsed = Number(Math.round((used / dailyApiRequests.Max) + "e+2")  + "e-2") * 100;
-        return `${percentageUsed}% (${used}/${dailyApiRequests.Max})`;
-    }),
 
     actions: {
 
@@ -120,6 +140,10 @@ export default Ember.Controller.extend({
             }).always(() => {
                 this.toggleProperty('loadingTestRun');
             });
+        },
+
+        updateOrgApiLimits(currentLimits) {
+            this.set('model.orgLimits', currentLimits);
         }
     },
 

@@ -34,6 +34,9 @@ module.exports = function(environment) {
 
 	if(environment === 'localhost' || environment === 'local') {
 		ENV.APP.apiDomain = 'http://localhost:5000';
+
+		ENV.APP.LOG_ACTIVE_GENERATION = true;
+		ENV.APP.LOG_VIEW_LOOKUPS = true;
 	}
 
 	if (environment === 'development') {
@@ -63,7 +66,7 @@ module.exports = function(environment) {
 
 	ENV['auth0-ember-simple-auth'] = {
 		domain: "sith-oath.auth0.com",
-		
+
 		//This property is found in the ".env" file for this project.
 		//See the "ember-cli-build.js" file for the "dotEnv" setup.
 		clientID: process.env.AUTH0_CLIENT_ID

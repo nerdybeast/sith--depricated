@@ -4,17 +4,22 @@ import config from 'sith/config/environment';
 
 export default Ember.Route.extend(AuthenticatedRouteMixin, {
 
+    //Inject the session service into this route
+	session: Ember.inject.service(),
+
     model() {
 
-        var classes = this.store.findAll('class');
-        var apiVersions = this.store.findAll('org-api-version');
-        var orgLimits = Ember.$.getJSON(`${config.APP.apiDomain}/api/limits`);
+        let orgId = this.get('session.data.authenticated.profile.organization_id');
+
+        let classes = this.store.findAll('class');
+        let apiVersions = this.store.findAll('org-api-version');
+        let orgLimits = Ember.$.getJSON(`${config.APP.apiDomain}/api/limits/${orgId}`);
 
         return Ember.RSVP.hash({classes, apiVersions, orgLimits}).then(hash => {
 
             //Turn the orgLimits property into an Ember Object so that we can observe changes.
             hash.orgLimits = Ember.Object.create(hash.orgLimits);
-            
+
             return hash;
         });
 	},

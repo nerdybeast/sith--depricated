@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import Base from 'auth0-ember-simple-auth/authenticators/lock';
+import config from 'sith/config/environment';
 
 const LOG_TITLE = 'authenticators/sith-custom';
 
@@ -18,11 +19,26 @@ let setHeaders = function(auth) {
         jqXHR.setRequestHeader('accessToken', auth.accessToken);
 	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
 	    jqXHR.setRequestHeader('instanceUrl', instanceUrl);
-        
+		jqXHR.setRequestHeader('username', auth.profile.username);
+
         //Setting the default global Accept header to request json api docs. This can be ovverriden
         //on a call to call basis by simply setting the Accept header. This will be useful in cases
         //when we want simple json.
         jqXHR.setRequestHeader('Accept', 'application/vnd.api+json');
+	});
+};
+
+let sendUserData = function(data) {
+	return new Ember.RSVP.Promise(resolve => {
+
+		let url = `${config.APP.apiDomain}/api/user`;
+		let contentType = 'application/json';
+		let profile = JSON.stringify(data.profile);
+
+		Ember.$.post({ url, contentType, data: profile }).then(() => {
+			return resolve(data);
+		});
+
 	});
 };
 
@@ -59,7 +75,7 @@ export default Base.extend({
     afterAuth: function(data) {
         console.info(LOG_TITLE + ' afterAuth =>', data);
         setHeaders(data);
-        return Ember.RSVP.resolve(data);
+        return sendUserData(data);
     },
 
     /**
@@ -78,7 +94,7 @@ export default Base.extend({
     afterRestore: function(data) {
         console.info(LOG_TITLE + ' afterRestore =>', data);
         setHeaders(data);
-        return Ember.RSVP.resolve(data);
+        return sendUserData(data);
     },
 
     /**
@@ -98,6 +114,6 @@ export default Base.extend({
     afterRefresh: function(data) {
         console.info(LOG_TITLE + ' afterRefresh =>', data);
         setHeaders(data);
-        return Ember.RSVP.resolve(data);
+        return sendUserData(data);
     }
 });
