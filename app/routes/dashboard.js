@@ -7,11 +7,11 @@ export default Ember.Route.extend(AuthenticatedRouteMixin, {
     session: Ember.inject.service(),
 
     model() {
-        let profile = this.get('session.data.authenticated.profile');
-        return Ember.$.post({
+
+        return Ember.$.ajax({
+            type: 'GET',
             url: `${config.APP.apiDomain}/api/dashboard`,
-            contentType: 'application/json',
-            data: JSON.stringify({ profile })
+            contentType: 'application/json'
         });
     },
 

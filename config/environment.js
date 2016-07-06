@@ -15,7 +15,8 @@ module.exports = function(environment) {
 		},
 
 		APP: {
-			ioDomain: null,
+
+			//Will point to the domain for the api backing this app.
 			apiDomain: null
 		}
 	};
@@ -33,18 +34,17 @@ module.exports = function(environment) {
 	}
 
 	if(environment === 'localhost' || environment === 'local') {
-		ENV.APP.apiDomain = 'http://localhost:5000';
 
+		//ENV.APP.LOG_RESOLVER = true;
 		ENV.APP.LOG_ACTIVE_GENERATION = true;
+		ENV.APP.LOG_TRANSITIONS = true;
+		//ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
 		ENV.APP.LOG_VIEW_LOOKUPS = true;
+
+		ENV.APP.apiDomain = 'http://localhost:5000';
 	}
 
 	if (environment === 'development') {
-		// ENV.APP.LOG_RESOLVER = true;
-		// ENV.APP.LOG_ACTIVE_GENERATION = true;
-		// ENV.APP.LOG_TRANSITIONS = true;
-		// ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-		// ENV.APP.LOG_VIEW_LOOKUPS = true;
 		ENV.APP.apiDomain = 'https://sith-apprentice-api.herokuapp.com';
 	}
 
@@ -60,8 +60,8 @@ module.exports = function(environment) {
 	//See: https://github.com/auth0/auth0-ember-simple-auth/blob/master/README.md
 	ENV['ember-simple-auth'] = {
 		authenticationRoute: 'index',
-	  	routeAfterAuthentication: 'home',
-	  	routeIfAlreadyAuthenticated: 'home'
+	  	routeAfterAuthentication: 'dashboard',
+	  	routeIfAlreadyAuthenticated: 'dashboard'
 	};
 
 	ENV['auth0-ember-simple-auth'] = {

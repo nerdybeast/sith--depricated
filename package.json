@@ -22,7 +22,6 @@
   "author": "nerdy beast",
   "license": "MIT",
   "devDependencies": {
-    "auth0-ember-simple-auth": "git://github.com/auth0/auth0-ember-simple-auth.git#a4c0964c8285994893ade3351c477cb470bdf39f",
     "broccoli-asset-rev": "^2.2.0",
     "broccoli-funnel": "^1.0.1",
     "ember-ajax": "0.7.1",
@@ -48,5 +47,7 @@
     "ember-websockets": "3.0.0",
     "loader.js": "^4.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "auth0-ember-simple-auth": "git://github.com/auth0/auth0-ember-simple-auth.git#a4c0964c8285994893ade3351c477cb470bdf39f"
+  }
 }

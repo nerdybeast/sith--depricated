@@ -7,9 +7,6 @@
     <!--Direct access of a controller proeprty-->
     <div>Current Org Api Version: {{currentMaxOrgVersion}} (lowest supported version is {{currentMinOrgVersion}})</div>
 
-    <!-- Tells this component that when it fires its own 'update' action, bubble this action up to a parent action called 'updateOrgApiLimits'. -->
-    {{org-limit-watch model=model.orgLimits update=(action 'updateOrgApiLimits')}}
-
 </div>
 <br />
 <div class="panel panel-default">

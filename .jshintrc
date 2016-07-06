@@ -1,16 +1,17 @@
 /* NOTES:
 
 We don't want to set the global <"node": true> linter in here because this project is technically a front-end
-app that runs in the browser. We want jshint to throw an error if node specific configurations make into the 
+app that runs in the browser. We want jshint to throw an error if node specific configurations make into the
 front-end code. Use the inline <jshint node:true> in any node files that are used during development.
-See the top of the ember-cli-build.js file for an example. 
+See the top of the ember-cli-build.js file for an example.
 
 */
 {
   "predef": [
     "document",
     "window",
-    "-Promise"
+    "-Promise",
+    "_"
   ],
   "browser": true,
   "boss": true,

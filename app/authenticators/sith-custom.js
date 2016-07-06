@@ -8,17 +8,13 @@ const LOG_TITLE = 'authenticators/sith-custom';
  * This is a little bit of a hack to add headers to all out-going requests made from this app. This is being done
  * until we can figure out how to set headers using the Auth0 authorizer when not using ember-data.
  */
-let setHeaders = function(auth) {
+let setGlobalHeaders = function(auth) {
 	Ember.$.ajaxPrefilter(function( options, oriOptions, jqXHR ) {
 
-		let customDomain = auth.profile.urls.custom_domain;
-		let enterprise = auth.profile.urls.enterprise;
-	    let instanceUrl = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
-
-	    jqXHR.setRequestHeader('sessionId', auth.profile.identities[0].access_token);
+		jqXHR.setRequestHeader('sessionId', auth.profile.session_id);
         jqXHR.setRequestHeader('accessToken', auth.accessToken);
 	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
-	    jqXHR.setRequestHeader('instanceUrl', instanceUrl);
+	    jqXHR.setRequestHeader('instanceUrl', auth.profile.instance_url);
 		jqXHR.setRequestHeader('username', auth.profile.username);
 
         //Setting the default global Accept header to request json api docs. This can be ovverriden
@@ -28,18 +24,31 @@ let setHeaders = function(auth) {
 	});
 };
 
-let sendUserData = function(data) {
+let parseAuth = function(auth, action) {
+
 	return new Ember.RSVP.Promise(resolve => {
+
+		let customDomain = auth.profile.urls.custom_domain;
+		let enterprise = auth.profile.urls.enterprise;
+
+		auth.profile.instance_url = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
+		auth.profile.session_id = auth.profile.identities[0].access_token;
+		auth.profile.user_id = auth.profile.identities[0].user_id;
+
+		setGlobalHeaders(auth);
+
+		console.info(`${LOG_TITLE} ${action} =>`, auth);
 
 		let url = `${config.APP.apiDomain}/api/user`;
 		let contentType = 'application/json';
-		let profile = JSON.stringify(data.profile);
+		let profile = JSON.stringify(auth.profile);
 
 		Ember.$.post({ url, contentType, data: profile }).then(() => {
-			return resolve(data);
+			return resolve(auth);
 		});
 
 	});
+
 };
 
 export default Base.extend({
@@ -73,9 +82,7 @@ export default Base.extend({
      * @return {Promise}     Promise with decorated session object
      */
     afterAuth: function(data) {
-        console.info(LOG_TITLE + ' afterAuth =>', data);
-        setHeaders(data);
-        return sendUserData(data);
+        return parseAuth(data, 'afterAuth');
     },
 
     /**
@@ -92,9 +99,7 @@ export default Base.extend({
      * @return {Promise}     The decorated session object
      */
     afterRestore: function(data) {
-        console.info(LOG_TITLE + ' afterRestore =>', data);
-        setHeaders(data);
-        return sendUserData(data);
+        return parseAuth(data, 'afterRestore');
     },
 
     /**
@@ -112,8 +117,6 @@ export default Base.extend({
      * @return {Promise}     Promise with decorated session object
      */
     afterRefresh: function(data) {
-        console.info(LOG_TITLE + ' afterRefresh =>', data);
-        setHeaders(data);
-        return sendUserData(data);
+        return parseAuth(data, 'afterRefresh');
     }
 });

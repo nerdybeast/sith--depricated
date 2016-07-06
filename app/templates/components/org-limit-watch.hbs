@@ -1,1 +1,19 @@
-<div>Daily Api Limit Usage: {{dailyApiUsage}}</div>
+<div class="panel panel-default">
+    <div class="panel-heading">Daily Org Limits</div>
+    <table class="table table-condensed table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Used</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each modelPretty as |limit|}}
+            <tr>
+                <td>{{limit.name}}</td>
+                <td>{{limit.value}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
