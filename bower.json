@@ -12,6 +12,7 @@
     "uri.js": "^1.18.0",
     "socket.io-client": "^1.4.6",
     "bootswatch": "3.3.6",
-    "lodash": "^4.13.1"
+    "lodash": "^4.13.1",
+    "clipboard": "^1.5.12"
   }
 }

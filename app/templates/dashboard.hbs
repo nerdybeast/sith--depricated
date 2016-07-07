@@ -1,3 +1,13 @@
-{{org-limit-watch model=model.orgLimits update=(action "updateOrgApiLimits")}}
+<!--Direct access of a controller proeprty-->
+<div>Current Org Api Version: {{currentMaxOrgVersion}} (lowest supported version is {{currentMinOrgVersion}})</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-6">
+            <!-- NOTE: "model.orgLimits" lives at controllers/dashboard.js -->
+            {{org-limit-watch model=model.orgLimits update=(action "updateOrgApiLimits")}}
+        </div>
+    </div>
+</div>
 
 {{outlet}}

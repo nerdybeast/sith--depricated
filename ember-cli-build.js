@@ -40,6 +40,9 @@ module.exports = function(defaults) {
 
 	app.import('bower_components/bootstrap/dist/js/bootstrap.min.js');
 	app.import('bower_components/lodash/dist/lodash.min.js');
+	app.import('bower_components/clipboard/dist/clipboard.min.js');
+
+	app.import('vendor/clipboard-setup.js');
 
 	//Pull the entire Bootstrap fonts directory into the app.
 	var bootstrapFonts = new Funnel('bower_components/bootstrap/dist/fonts', {

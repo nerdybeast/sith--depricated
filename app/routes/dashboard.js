@@ -8,10 +8,17 @@ export default Ember.Route.extend(AuthenticatedRouteMixin, {
 
     model() {
 
-        return Ember.$.ajax({
-            type: 'GET',
-            url: `${config.APP.apiDomain}/api/dashboard`,
-            contentType: 'application/json'
+        let apiVersions = this.store.findAll('org-api-version');
+        let dashboard = Ember.$.getJSON(`${config.APP.apiDomain}/api/dashboard`);
+
+        return Ember.RSVP.hash({ apiVersions, dashboard }).then(function(hash) {
+
+            //Turn the orgLimits property into an Ember Object so that we can observe changes.
+            hash.orgLimits = Ember.Object.create(hash.dashboard.orgLimits);
+
+            delete hash.dashboard;
+
+            return hash;
         });
     },
 

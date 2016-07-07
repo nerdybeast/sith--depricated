@@ -17,7 +17,7 @@ export default Ember.Component.extend({
 
     dashboardSocketNamespace: null,
 
-    //Default ember hook that we are overriding to instantiate sokct.io
+    //Default ember hook that we are overriding to instantiate socket.io
 	//See: http://emberjs.com/api/classes/Ember.Controller.html#method_init
     init() {
 
@@ -32,7 +32,7 @@ export default Ember.Component.extend({
 
         mainSocket.on('connect', () => {
 
-            //NOTE: "this" in this context of the socket connection is undefined (even if using function() instead of the above arrow function),
+            //NOTE: "this" in this context of the socket connection is undefined (even if using function() instead of the above lexical arrow function),
             //no way to get the socket id unless we ask the server for it.
 
             console.info('mainSocket connected in the org-limit-watch component.');
@@ -42,18 +42,24 @@ export default Ember.Component.extend({
             mainSocket.emit('initialize-dashboard', this.get('profile.username'), (response) => {
 
                 console.info('initialize-dashboard response =>', response);
+
                 this.set('dashboardSocketNamespace', response.socketNamespace);
 
                 //Here we are letting the server tell us what socket namespace to use.
                 let orgLimitsSocket = this.get('io').socketFor(`${config.APP.apiDomain}/${response.socketNamespace}`);
 
-                //TODO: Figure out why this is firing twice...
+                //TODO: Figure out why this connect event is firing twice...
                 orgLimitsSocket.on('connect', () => {
                     console.info('org-limit-socket connected');
                 });
 
                 orgLimitsSocket.on('org-limits-update', this.orgLimitsUpdate, this);
             });
+        });
+
+        mainSocket.on('reconnecting', (attemptCount) => {
+            //TODO: Use this to show a loading icon or some kind of indicator to the user that socket is trying to reconnect.
+            console.warn(`mainSocket trying to reconnect, attempt number ${attemptCount}`);
         });
 	},
 
@@ -68,13 +74,6 @@ export default Ember.Component.extend({
         orgLimitsSocket.off('org-limits-update', this.orgLimitsUpdate, this);
     },
 
-    // dailyApiUsage: Ember.computed('model', function() {
-    //     let dailyApiRequests = this.get('model.DailyApiRequests');
-    //     let used = dailyApiRequests.Max - dailyApiRequests.Remaining;
-    //     let percentageUsed = Number(Math.round((used / dailyApiRequests.Max) + "e+2")  + "e-2") * 100;
-    //     return `${percentageUsed}% (${used}/${dailyApiRequests.Max})`;
-    // }),
-
     modelPretty: Ember.computed('model', function() {
 
         let data = [];
@@ -84,8 +83,8 @@ export default Ember.Component.extend({
             let name = key.dasherize().split('-').map(word => word.capitalize()).join(' ');
 
             let used = val.Max - val.Remaining;
-            let percentageUsed = Number(Math.round((used / val.Max) + "e+2")  + "e-2") * 100;
-            let value = `${percentageUsed}% (${used}/${val.Max})`;
+            let percentageUsed = Number(Math.floor((used / val.Max) + "e+2"));
+            let value = `${percentageUsed}% (${used} / ${val.Max})`;
 
             data.push({ name, value });
         });
