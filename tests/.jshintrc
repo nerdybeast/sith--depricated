@@ -22,7 +22,8 @@
     "currentURL",
     "currentPath",
     "currentRouteName",
-    "_"
+    "_",
+    "Clipboard"
   ],
   "node": false,
   "browser": false,
