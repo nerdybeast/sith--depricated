@@ -15,7 +15,9 @@ export default Ember.Component.extend({
         return this.get('io').socketFor(`${config.APP.apiDomain}/`);
     }),
 
-    dashboardSocketNamespace: null,
+    dashboardSocket: null,
+
+    socketStatus: null,
 
     //Default ember hook that we are overriding to instantiate socket.io
 	//See: http://emberjs.com/api/classes/Ember.Controller.html#method_init
@@ -37,41 +39,45 @@ export default Ember.Component.extend({
 
             console.info('mainSocket connected in the org-limit-watch component.');
 
-            //NOTE: We are nesting this .emit() inside of the main socket connect because if the server is restarted, the "connect" event
-            //will automatically fire again without having to refresh the page. If this happens we want to automaticaly restart our dashboard stats.
-            mainSocket.emit('initialize-dashboard', this.get('profile.username'), (response) => {
+            if(!this.get('dashboardSocket')) {
 
-                console.info('initialize-dashboard response =>', response);
+                mainSocket.emit('initialize-dashboard', this.get('profile'), (socketNamespace) => {
 
-                this.set('dashboardSocketNamespace', response.socketNamespace);
+                    console.info('initialize-dashboard response =>', socketNamespace);
 
-                //Here we are letting the server tell us what socket namespace to use.
-                let orgLimitsSocket = this.get('io').socketFor(`${config.APP.apiDomain}/${response.socketNamespace}`);
+                    let dashboardSocket = this.get('io').socketFor(`${config.APP.apiDomain}/${socketNamespace}`);
 
-                //TODO: Figure out why this connect event is firing twice...
-                orgLimitsSocket.on('connect', () => {
-                    console.info('org-limit-socket connected');
+                    dashboardSocket.on('connect', () => this.set('socketStatus', 'connected'));
+                    dashboardSocket.on('reconnecting', () => this.set('socketStatus', 'connecting'));
+                    dashboardSocket.on('reconnect_error', () => this.set('socketStatus', 'disconnected'));
+                    dashboardSocket.on('reconnect', this.dashboardReconnect, this);
+                    dashboardSocket.on('org-limits-update', this.orgLimitsUpdate, this);
+
+                    this.set('dashboardSocket', dashboardSocket);
                 });
-
-                orgLimitsSocket.on('org-limits-update', this.orgLimitsUpdate, this);
-            });
+            }
         });
 
         mainSocket.on('reconnecting', (attemptCount) => {
-            //TODO: Use this to show a loading icon or some kind of indicator to the user that socket is trying to reconnect.
             console.warn(`mainSocket trying to reconnect, attempt number ${attemptCount}`);
+            // this.set('socketStatus', 'connecting');
+        });
+
+        mainSocket.on('reconnect', (attemptCount) => {
+            console.info(`mainSocket reconnected on attempt number ${attemptCount}`);
+            // this.set('socketStatus', 'connected');
+        });
+
+        mainSocket.on('reconnect_error', (error) => {
+            console.error(`mainSocket unable to reconnect => ${error.message}`);
+            // this.set('socketStatus', 'disconnected');
         });
 	},
 
     //Default Ember hook
     willDestroyElement() {
-        console.log('willDestroyElement');
-
-        let dashboardSocketNamespace = this.get('dashboardSocketNamespace');
-        console.log('dashboardSocketNamespace =>', dashboardSocketNamespace);
-
-        let orgLimitsSocket = this.get('io').socketFor(`${config.APP.apiDomain}/${dashboardSocketNamespace}`);
-        orgLimitsSocket.off('org-limits-update', this.orgLimitsUpdate, this);
+        let dashboardSocket = this.get('dashboardSocket');
+        dashboardSocket.off('org-limits-update', this.orgLimitsUpdate);
     },
 
     modelPretty: Ember.computed('model', function() {
@@ -81,9 +87,15 @@ export default Ember.Component.extend({
         _.forEach(this.get('model'), (val, key) => {
 
             let name = key.dasherize().split('-').map(word => word.capitalize()).join(' ');
-
             let used = val.Max - val.Remaining;
             let percentageUsed = Number(Math.floor((used / val.Max) + "e+2"));
+
+            //Will be true if the percentage is too samll of a number to run Math.floor() on, example:
+            //percentageUsed => 9.777777777777778e-7
+            if(isNaN(percentageUsed)) {
+                percentageUsed = 0;
+            }
+
             let value = `${percentageUsed}% (${used} / ${val.Max})`;
 
             data.push({ name, value });
@@ -94,6 +106,10 @@ export default Ember.Component.extend({
 
     orgLimitsUpdate(message) {
         this.sendAction('update', Ember.Object.create(message));
-    }
+    },
 
+    dashboardReconnect() {
+        this.set('socketStatus', 'connected');
+        this.get('mainSocket').emit('initialize-dashboard', this.get('profile'));
+    }
 });
