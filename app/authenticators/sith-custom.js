@@ -16,6 +16,8 @@ let setGlobalHeaders = function(auth) {
 	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
 	    jqXHR.setRequestHeader('instanceUrl', auth.profile.instance_url);
 		jqXHR.setRequestHeader('username', auth.profile.username);
+		jqXHR.setRequestHeader('userId', auth.profile.user_id);
+		jqXHR.setRequestHeader('orgId', auth.profile.organization_id);
 
         //Setting the default global Accept header to request json api docs. This can be ovverriden
         //on a call to call basis by simply setting the Accept header. This will be useful in cases

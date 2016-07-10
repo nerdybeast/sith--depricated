@@ -58,20 +58,9 @@ export default Ember.Component.extend({
             }
         });
 
-        mainSocket.on('reconnecting', (attemptCount) => {
-            console.warn(`mainSocket trying to reconnect, attempt number ${attemptCount}`);
-            // this.set('socketStatus', 'connecting');
-        });
-
-        mainSocket.on('reconnect', (attemptCount) => {
-            console.info(`mainSocket reconnected on attempt number ${attemptCount}`);
-            // this.set('socketStatus', 'connected');
-        });
-
-        mainSocket.on('reconnect_error', (error) => {
-            console.error(`mainSocket unable to reconnect => ${error.message}`);
-            // this.set('socketStatus', 'disconnected');
-        });
+        mainSocket.on('reconnecting', (attemptCount) => console.warn(`mainSocket trying to reconnect, attempt number ${attemptCount}`));
+        mainSocket.on('reconnect', (attemptCount) => console.info(`mainSocket reconnected on attempt number ${attemptCount}`));
+        mainSocket.on('reconnect_error', (error) => console.error(`mainSocket unable to reconnect => ${error.message}`));
 	},
 
     //Default Ember hook

@@ -31,11 +31,6 @@ export default Ember.Controller.extend({
         //Will fire when we make a connection to the socket.io instance running on the server.
 		socket.on('connect', () => {
 			console.info('Socket connected!');
-
-            socket.emit('hand-shake', this.get('homeController.profile.username'), (socketId) => {
-                console.log(socketId);
-            });
-
 		});
 
         socket.on('disconnect', () => {
@@ -80,7 +75,8 @@ export default Ember.Controller.extend({
             }
 
             let data = {
-                userId: this.get('homeController.userId'),
+
+                userId: this.get('homeController.profile.user_id'),
 
                 //Extract an array of just the ids for the classes that have been selected.
                 classIds: classes.mapBy('id')
