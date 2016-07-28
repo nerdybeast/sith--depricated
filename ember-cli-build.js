@@ -41,6 +41,7 @@ module.exports = function(defaults) {
 	app.import('bower_components/bootstrap/dist/js/bootstrap.min.js');
 	app.import('bower_components/lodash/dist/lodash.min.js');
 	app.import('bower_components/clipboard/dist/clipboard.min.js');
+	app.import('bower_components/moment/min/moment.min.js');
 
 	app.import('vendor/clipboard-setup.js');
 

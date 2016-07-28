@@ -2,6 +2,8 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
 
+    session: Ember.inject.service(),
+
     orgLimitUpdateCount: 0,
 
     //Our api adds an "id" property to the api versions response from Salesforce and we simply copy the version number
@@ -34,6 +36,10 @@ export default Ember.Controller.extend({
             });
 
             this.store.createRecord('org-limit', currentLimits);
+        },
+
+        onTraceFlagCreate() {
+            this.set('model.traceFlags', this.store.peekAll('trace-flag'));
         }
     }
 });

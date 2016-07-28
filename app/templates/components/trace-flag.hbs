@@ -1,0 +1,86 @@
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        <h4>Trace Flag <small><em>used for debug logs</em></small></h4>
+    </div>
+
+    {{#if alert}}
+        {{bootstrap/alert-box model=alert close=(action "closeAlert")}}
+    {{/if}}
+
+    <table class="table table-condensed table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Log Type</th>
+                <th>Debug Level</th>
+                <th>Expiration Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each model as |traceFlag|}}
+                <tr>
+                    <td>
+                        <!-- isSaving fires if the record is in a saving state, whether that means being deleted, updated, etc... -->
+                        {{#if traceFlag.isSaving}}
+                            <span class="glyphicon glyphicon-cog glyphicon-animate-spin text-success" data-toggle="tooltip" title="Saving..."></span>
+                        {{else}}
+                            <span {{action "deleteTraceFlag" traceFlag}} class="glyphicon glyphicon-remove text-danger" data-toggle="tooltip" title="Delete"></span>
+                        {{/if}}
+                    </td>
+                    <td>{{traceFlag.logType}}</td>
+                    <td>
+                        <span data-toggle="tooltip" data-placement="right" data-html="true" title={{traceFlag.loggingLevelsHtml}}>{{traceFlag.debugLevel.developerName}}</span>
+                    </td>
+                    <td>{{moment-date traceFlag.expirationDate "lll"}}</td>
+                    <td>
+                        <div class="btn-group btn-group-xs" role="group">
+                            <button {{action "updateTraceFlag" traceFlag 3}} type="button" class="btn btn-default">3 hrs</button>
+                            <button {{action "updateTraceFlag" traceFlag 6}} type="button" class="btn btn-default">6 hrs</button>
+                            <button {{action "updateTraceFlag" traceFlag 12}} type="button" class="btn btn-default">12 hrs</button>
+                        </div>
+                    </td>
+                </tr>
+            {{/each}}
+            <tr>
+                <td>
+                    {{#if isEditingNewTraceFlag}}
+                        <span {{action "cancelNewTraceFlag"}} class="glyphicon glyphicon-remove text-danger" data-toggle="tooltip" title="Cancel"></span>
+                    {{else}}
+                        <span {{action "editNewTraceFlag"}} class="glyphicon glyphicon-plus text-success" data-toggle="tooltip" title="New Trace Flag"></span>
+                    {{/if}}
+                </td>
+                <td colspan="4">
+                    {{#if isEditingNewTraceFlag}}
+                        <div class="row">
+                            <div class="col-xs-8 col-sm-8 col-md-6 col-lg-8">
+                                <div class="input-group input-group-sm">
+                                    <input id="debugLevelInput" type="text" class="form-control">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                            Debug Level
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu scrollable-menu">
+                                            {{#each debugLevels as |debugLevel|}}
+                                                <li {{action "setDebugLevel" debugLevel}}><a>{{debugLevel.developerName}}</a></li>
+                                            {{/each}}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-4 col-sm-4 col-md-6 col-lg-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button {{action "saveNewTraceFlag" 3}} type="button" class="btn btn-default">3 hrs</button>
+                                    <button {{action "saveNewTraceFlag" 6}} type="button" class="btn btn-default">6 hrs</button>
+                                    <button {{action "saveNewTraceFlag" 12}} type="button" class="btn btn-default">12 hrs</button>
+                                </div>
+                            </div>
+                        </div>
+                    {{/if}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

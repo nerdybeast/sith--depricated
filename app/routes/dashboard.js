@@ -8,15 +8,24 @@ export default Ember.Route.extend(AuthenticatedRouteMixin, {
 
     model() {
 
-        let apiVersions = this.store.findAll('org-api-version');
-        let dashboard = Ember.$.getJSON(`${config.APP.apiDomain}/api/dashboard`);
+        let user = this.get('session.data.authenticated.profile.user_id');
 
-        return Ember.RSVP.hash({ apiVersions, dashboard }).then(function(hash) {
+        let apiVersions = this.store.findAll('org-api-version');
+        let debugLevels = this.store.findAll('debug-level');
+        let dashboard = Ember.$.getJSON(`${config.APP.apiDomain}/api/dashboard`);
+        let traceFlags = this.store.query('trace-flag', { user });
+
+        return Ember.RSVP.hash({ apiVersions, debugLevels, dashboard, traceFlags }).then((hash) => {
 
             //Turn the orgLimits property into an Ember Object so that we can observe changes.
             hash.orgLimits = Ember.Object.create(hash.dashboard.orgLimits);
 
             delete hash.dashboard;
+
+            hash.traceFlags.forEach(flag => {
+                let debugLevel = this.store.peekRecord('debug-level', flag.get('debugLevelId'));
+                flag.set('debugLevel', debugLevel);
+            });
 
             return hash;
         });

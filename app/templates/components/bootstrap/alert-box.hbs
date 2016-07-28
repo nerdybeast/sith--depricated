@@ -1,0 +1,9 @@
+<button type="button" class="close" data-dismiss="alert"><span class="glyphicon glyphicon-remove"></span></button>
+
+{{#if model.title}}
+    <h5>{{model.title}}</h5>
+{{/if}}
+
+{{model.details}}
+
+{{yield}}
