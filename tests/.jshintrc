@@ -23,7 +23,8 @@
     "currentPath",
     "currentRouteName",
     "_",
-    "Clipboard"
+    "Clipboard",
+    "moment"
   ],
   "node": false,
   "browser": false,

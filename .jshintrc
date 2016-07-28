@@ -12,7 +12,8 @@ See the top of the ember-cli-build.js file for an example.
     "window",
     "-Promise",
     "_",
-    "Clipboard"
+    "Clipboard",
+    "moment"
   ],
   "browser": true,
   "boss": true,

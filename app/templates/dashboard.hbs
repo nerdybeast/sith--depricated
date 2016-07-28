@@ -7,6 +7,9 @@
             <!-- NOTE: "model.orgLimits" lives at controllers/dashboard.js -->
             {{org-limit-watch model=model.orgLimits update=(action "updateOrgApiLimits")}}
         </div>
+        <div class="col-sm-12 col-md-12 col-lg-6">
+            {{trace-flag model=model.traceFlags create=(action "onTraceFlagCreate")}}
+        </div>
     </div>
 </div>
 
