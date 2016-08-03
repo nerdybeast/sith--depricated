@@ -26,3 +26,15 @@
     max-height: 200px;
     overflow-x: hidden;
 }
+
+/*
+The ember-notify addon's way of configuring the position of the notifications is way to difficult to implement correctly
+so here we are going to override this css block directly found here: https://github.com/aexmachina/ember-notify/blob/master/vendor/ember-notify.css
+This is definitely not a good idea but it's going to get us by for now.
+*/
+.ember-notify-default.ember-notify-cn {
+    position: fixed;
+    z-index: 5000;
+    top: 60px;
+    right: 0px;
+}

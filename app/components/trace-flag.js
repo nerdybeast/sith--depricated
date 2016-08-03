@@ -4,6 +4,7 @@ export default Ember.Component.extend({
 
     store: Ember.inject.service(),
     session: Ember.inject.service(),
+    notify: Ember.inject.service(),
 
     isEditingNewTraceFlag: false,
 
@@ -43,6 +44,8 @@ export default Ember.Component.extend({
 
         updateTraceFlag(traceFlag, hours) {
 
+            let notify = this.get('notify');
+
             traceFlag.setProperties({
                 'startDate': moment().format(),
                 'expirationDate': moment().add(hours, 'hours').format()
@@ -51,22 +54,14 @@ export default Ember.Component.extend({
             traceFlag.save().then(result => {
 
                 console.info('updating trace flag result =>', result);
-
-                this.set('alert', Ember.Object.create({
-                    severity: 'success',
-                    details: `Successfully updated trace flag`
-                }));
+                notify.success('TraceFlag successfully updated');
 
             }).catch(error => {
 
                 traceFlag.rollbackAttributes();
-
-                this.set('alert', Ember.Object.create({
-                    severity: 'danger',
-                    details: `Unable to create trace flag`
-                }));
-
+                notify.error('Failed to update TraceFlag');
                 console.error('failed to update trace flag =>', error);
+
             });
         },
 
@@ -85,6 +80,7 @@ export default Ember.Component.extend({
 
         saveNewTraceFlag(hours) {
 
+            let notify = this.get('notify');
             let startDate = moment().format();
             let expirationDate = moment().add(hours, 'hours').format();
 
@@ -109,11 +105,7 @@ export default Ember.Component.extend({
             newTraceFlag.save().then(result => {
 
                 console.info(result);
-
-                this.set('alert', Ember.Object.create({
-                    severity: 'success',
-                    details: `Successfully created trace flag`
-                }));
+                notify.success('TraceFlag successfully created');
 
             }).catch(error => {
 
@@ -125,18 +117,22 @@ export default Ember.Component.extend({
                 //Re-enable the form so the user can try again.
                 this.toggleProperty('isEditingNewTraceFlag');
 
-                this.set('alert', Ember.Object.create({
-                    severity: 'danger',
-                    details: `Unable to create trace flag`
-                }));
+                notify.error('Failed to create TraceFlag');
+
             });
         },
 
         deleteTraceFlag(traceFlag) {
+
+            let notify = this.get('notify');
+
+            //Will send a delete request to the server.
             traceFlag.destroyRecord().then(result => {
                 console.info('delete result', result);
+                notify.success('TraceFlag successfully deleted');
             }).catch(error => {
                 console.error(error);
+                notify.error('Unable to delete TraceFlag');
             });
         },
 
