@@ -1,3 +1,12 @@
+/*
+It may be due to the color scheme of the dark bootstrap theme we are using but the text in the ember-power-select
+was too light to see clearly. Here we are darkening it a little bit.
+*/
+$ember-power-select-text-color: #333;
+
+@import 'ember-power-select/themes/bootstrap';
+@import "ember-power-select";
+
 .glyphicon-animate-spin {
     -animation: spin 2s infinite linear;
     -ms-animation: spin 2s infinite linear;
