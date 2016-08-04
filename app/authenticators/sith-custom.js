@@ -11,12 +11,14 @@ const LOG_TITLE = 'authenticators/sith-custom';
 let setGlobalHeaders = function(auth) {
 	Ember.$.ajaxPrefilter(function( options, oriOptions, jqXHR ) {
 
-		jqXHR.setRequestHeader('sessionId', auth.profile.session_id);
+		let identity = auth.profile.identities[0];
+
+		jqXHR.setRequestHeader('sessionId', identity.access_token);
         jqXHR.setRequestHeader('accessToken', auth.accessToken);
 	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
 	    jqXHR.setRequestHeader('instanceUrl', auth.profile.instance_url);
 		jqXHR.setRequestHeader('username', auth.profile.username);
-		jqXHR.setRequestHeader('userId', auth.profile.user_id);
+		jqXHR.setRequestHeader('userId', identity.user_id);
 		jqXHR.setRequestHeader('orgId', auth.profile.organization_id);
 
         //Setting the default global Accept header to request json api docs. This can be ovverriden
@@ -28,27 +30,45 @@ let setGlobalHeaders = function(auth) {
 
 let parseAuth = function(auth, action) {
 
-	return new Ember.RSVP.Promise(resolve => {
+	// return new Ember.RSVP.Promise(resolve => {
+	//
+	// 	let customDomain = auth.profile.urls.custom_domain;
+	// 	let enterprise = auth.profile.urls.enterprise;
+	//
+	// 	auth.profile.instance_url = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
+	// 	auth.profile.session_id = auth.profile.identities[0].access_token;
+	// 	auth.profile.user_id = auth.profile.identities[0].user_id;
+	//
+	// 	setGlobalHeaders(auth);
+	//
+	// 	console.info(`${LOG_TITLE} ${action} =>`, auth);
+	//
+	// 	let url = `${config.APP.apiDomain}/api/user`;
+	// 	let contentType = 'application/json';
+	// 	let profile = JSON.stringify(auth.profile);
+	//
+	// 	Ember.$.post({ url, contentType, data: profile }).then(() => {
+	// 		return resolve(auth);
+	// 	});
+	//
+	// });
 
-		let customDomain = auth.profile.urls.custom_domain;
-		let enterprise = auth.profile.urls.enterprise;
+	let options = {
+		method: 'GET',
+		url: `${config.APP.apiDomain}/api/user/${auth.profile.user_id}`,
+		headers: {
+			Authorization: `Bearer ${auth.jwt}`
+		}
+	};
 
-		auth.profile.instance_url = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
-		auth.profile.session_id = auth.profile.identities[0].access_token;
-		auth.profile.user_id = auth.profile.identities[0].user_id;
+	return Ember.$.ajax(options).then(profile => {
 
-		setGlobalHeaders(auth);
+		auth.profile = profile;
 
 		console.info(`${LOG_TITLE} ${action} =>`, auth);
 
-		let url = `${config.APP.apiDomain}/api/user`;
-		let contentType = 'application/json';
-		let profile = JSON.stringify(auth.profile);
-
-		Ember.$.post({ url, contentType, data: profile }).then(() => {
-			return resolve(auth);
-		});
-
+		setGlobalHeaders(auth);
+		return auth;
 	});
 
 };
