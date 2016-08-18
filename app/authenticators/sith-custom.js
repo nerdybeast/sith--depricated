@@ -11,12 +11,16 @@ const LOG_TITLE = 'authenticators/sith-custom';
 let setGlobalHeaders = function(auth) {
 	Ember.$.ajaxPrefilter(function( options, oriOptions, jqXHR ) {
 
-		jqXHR.setRequestHeader('sessionId', auth.profile.session_id);
-        jqXHR.setRequestHeader('accessToken', auth.accessToken);
+		let identity = auth.profile.identities[0];
+
+		//These two properties will allow the backend to authenticate each incoming request.
+		jqXHR.setRequestHeader('accessToken', auth.accessToken);
 	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
+
+		jqXHR.setRequestHeader('sessionId', auth.profile.session_id);
 	    jqXHR.setRequestHeader('instanceUrl', auth.profile.instance_url);
 		jqXHR.setRequestHeader('username', auth.profile.username);
-		jqXHR.setRequestHeader('userId', auth.profile.user_id);
+		jqXHR.setRequestHeader('userId', identity.user_id);
 		jqXHR.setRequestHeader('orgId', auth.profile.organization_id);
 
         //Setting the default global Accept header to request json api docs. This can be ovverriden
@@ -28,27 +32,34 @@ let setGlobalHeaders = function(auth) {
 
 let parseAuth = function(auth, action) {
 
+	//NOTE: This function has to return an Ember Promise, simply returning a jquery promise doesn't seem to update the auth session properly.
 	return new Ember.RSVP.Promise(resolve => {
 
-		let customDomain = auth.profile.urls.custom_domain;
-		let enterprise = auth.profile.urls.enterprise;
+		if(auth.profile.instance_url && auth.profile.session_id) {
+			return resolve(auth);
+		}
 
-		auth.profile.instance_url = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
-		auth.profile.session_id = auth.profile.identities[0].access_token;
-		auth.profile.user_id = auth.profile.identities[0].user_id;
+		let options = {
+			method: 'GET',
+			url: `${config.APP.apiDomain}/api/user/${auth.profile.user_id}`,
+			headers: {
+				Authorization: `Bearer ${auth.jwt}`
+			}
+		};
 
-		setGlobalHeaders(auth);
+		Ember.$.ajax(options).then(result => {
 
-		console.info(`${LOG_TITLE} ${action} =>`, auth);
+			auth.profile.instance_url = result.instanceUrl;
+			auth.profile.session_id = result.sessionId;
 
-		let url = `${config.APP.apiDomain}/api/user`;
-		let contentType = 'application/json';
-		let profile = JSON.stringify(auth.profile);
+			console.info(`${LOG_TITLE} ${action} =>`, auth);
 
-		Ember.$.post({ url, contentType, data: profile }).then(() => {
 			return resolve(auth);
 		});
 
+	}).then(updatedAuth => {
+		setGlobalHeaders(updatedAuth);
+		return updatedAuth;
 	});
 
 };
