@@ -13,9 +13,11 @@ let setGlobalHeaders = function(auth) {
 
 		let identity = auth.profile.identities[0];
 
-		jqXHR.setRequestHeader('sessionId', identity.access_token);
-        jqXHR.setRequestHeader('accessToken', auth.accessToken);
+		//These two properties will allow the backend to authenticate each incoming request.
+		jqXHR.setRequestHeader('accessToken', auth.accessToken);
 	    jqXHR.setRequestHeader('Authorization', `Bearer ${auth.jwt}`);
+
+		jqXHR.setRequestHeader('sessionId', auth.profile.session_id);
 	    jqXHR.setRequestHeader('instanceUrl', auth.profile.instance_url);
 		jqXHR.setRequestHeader('username', auth.profile.username);
 		jqXHR.setRequestHeader('userId', identity.user_id);
@@ -28,30 +30,7 @@ let setGlobalHeaders = function(auth) {
 	});
 };
 
-let parseAuth = function(auth, action) {
-
-	// return new Ember.RSVP.Promise(resolve => {
-	//
-	// 	let customDomain = auth.profile.urls.custom_domain;
-	// 	let enterprise = auth.profile.urls.enterprise;
-	//
-	// 	auth.profile.instance_url = customDomain || enterprise.substring(0, enterprise.indexOf('/services'));
-	// 	auth.profile.session_id = auth.profile.identities[0].access_token;
-	// 	auth.profile.user_id = auth.profile.identities[0].user_id;
-	//
-	// 	setGlobalHeaders(auth);
-	//
-	// 	console.info(`${LOG_TITLE} ${action} =>`, auth);
-	//
-	// 	let url = `${config.APP.apiDomain}/api/user`;
-	// 	let contentType = 'application/json';
-	// 	let profile = JSON.stringify(auth.profile);
-	//
-	// 	Ember.$.post({ url, contentType, data: profile }).then(() => {
-	// 		return resolve(auth);
-	// 	});
-	//
-	// });
+function parseAuth(auth, action) {
 
 	let options = {
 		method: 'GET',
@@ -61,9 +40,10 @@ let parseAuth = function(auth, action) {
 		}
 	};
 
-	return Ember.$.ajax(options).then(profile => {
+	return Ember.$.ajax(options).then(result => {
 
-		auth.profile = profile;
+		auth.profile.instance_url = result.instanceUrl;
+		auth.profile.session_id = result.sessionId;
 
 		console.info(`${LOG_TITLE} ${action} =>`, auth);
 
@@ -71,7 +51,7 @@ let parseAuth = function(auth, action) {
 		return auth;
 	});
 
-};
+}
 
 export default Base.extend({
 
