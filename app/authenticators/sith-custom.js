@@ -30,28 +30,39 @@ let setGlobalHeaders = function(auth) {
 	});
 };
 
-function parseAuth(auth, action) {
+let parseAuth = function(auth, action) {
 
-	let options = {
-		method: 'GET',
-		url: `${config.APP.apiDomain}/api/user/${auth.profile.user_id}`,
-		headers: {
-			Authorization: `Bearer ${auth.jwt}`
+	//NOTE: This function has to return an Ember Promise, simply returning a jquery promise doesn't seem to update the auth session properly.
+	return new Ember.RSVP.Promise(resolve => {
+
+		if(auth.profile.instance_url && auth.profile.session_id) {
+			return resolve(auth);
 		}
-	};
 
-	return Ember.$.ajax(options).then(result => {
+		let options = {
+			method: 'GET',
+			url: `${config.APP.apiDomain}/api/user/${auth.profile.user_id}`,
+			headers: {
+				Authorization: `Bearer ${auth.jwt}`
+			}
+		};
 
-		auth.profile.instance_url = result.instanceUrl;
-		auth.profile.session_id = result.sessionId;
+		Ember.$.ajax(options).then(result => {
 
-		console.info(`${LOG_TITLE} ${action} =>`, auth);
+			auth.profile.instance_url = result.instanceUrl;
+			auth.profile.session_id = result.sessionId;
 
-		setGlobalHeaders(auth);
-		return auth;
+			console.info(`${LOG_TITLE} ${action} =>`, auth);
+
+			return resolve(auth);
+		});
+
+	}).then(updatedAuth => {
+		setGlobalHeaders(updatedAuth);
+		return updatedAuth;
 	});
 
-}
+};
 
 export default Base.extend({
 
