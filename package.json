@@ -17,7 +17,8 @@
     "url": "https://github.com/nerdybeast/sith"
   },
   "engines": {
-    "node": "4.4.5"
+    "node": "4.5.0",
+    "npm": "3.9.6"
   },
   "author": "nerdy beast",
   "license": "MIT",
