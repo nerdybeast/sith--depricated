@@ -19,6 +19,15 @@ export default Ember.Component.extend({
     tagName: 'span',
     classNames: ['glyphicon'],
     classNameBindings: ['isConnecting:glyphicon-animate-spin', 'textColor', 'icon'],
+    attributeBindings: ['data-toggle', 'data-original-title'],
+
+    //Adds data-toggle="tooltip" to this element
+    'data-toggle': 'tooltip',
+
+    //Small hack to allow dynamic updating of the tooltip content: http://www.jellyfishtechnologies.com/change-bootstrap-tooltip-content-dynamically/
+    'data-original-title': Ember.computed('status', function() {
+        return `Websocket ${this.get('status')}`;
+    }),
 
     textColor: null,
     isConnecting: null,
@@ -45,5 +54,15 @@ export default Ember.Component.extend({
         }
 
         this.setProperties({ textColor, isConnecting, icon });
-    })
+    }),
+
+    //Fired after every render of this component.
+    didRender() {
+        this.$().tooltip();
+    },
+
+    //Fired when this component is about to be removed from the DOM.
+    willDestroyElement() {
+        this.$().tooltip('destroy');
+    }
 });

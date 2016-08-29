@@ -4,12 +4,11 @@ import config from 'sith/config/environment';
 
 export default Ember.Route.extend(AuthenticatedRouteMixin, {
 
-    session: Ember.inject.service(),
-    profile: Ember.computed.alias('session.data.authenticated.profile'),
+    user: Ember.inject.service(),
 
     model() {
 
-        let user = this.get('profile.identities')[0].user_id;
+        let user = this.get('user.id');
 
         let apiVersions = this.store.findAll('org-api-version');
         let debugLevels = this.store.findAll('debug-level');

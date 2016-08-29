@@ -1,10 +1,9 @@
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h4>
-            Daily Org Limits <small><em>rolling 24 hour window</em></small>
-            <div class="pull-right">{{connection-status status=socketStatus}}</div>
-        </h4>
-    </div>
+    
+    {{#bootstrap/panel-heading primary="Daily Org Limits" secondary="rolling 24 hour window"}}
+        <div class="pull-right">{{connection-status status=socketStatus}}</div>
+    {{/bootstrap/panel-heading}}
+
     <table class="table table-condensed table-hover">
         <thead>
             <tr>

@@ -3,7 +3,7 @@ import Ember from 'ember';
 export default Ember.Component.extend({
 
     store: Ember.inject.service(),
-    session: Ember.inject.service(),
+    user: Ember.inject.service(),
     notify: Ember.inject.service(),
 
     isEditingNewTraceFlag: false,
@@ -84,8 +84,6 @@ export default Ember.Component.extend({
             let startDate = moment().format();
             let expirationDate = moment().add(hours, 'hours').format();
 
-            //let chosenDebugLevel = this.$('#debugLevelInput').val();
-            //let debugLevel = this.get('store').peekAll('debug-level').findBy('developerName', chosenDebugLevel);
             let debugLevel = this.get('newDebugLevel');
 
             //Hide the trace flag form during the save.
@@ -93,7 +91,7 @@ export default Ember.Component.extend({
 
             let newTraceFlag = this.get('store').createRecord('trace-flag', {
                 logType: 'USER_DEBUG',
-                tracedEntityId: this.get('session.data.authenticated.profile.user_id'),
+                tracedEntityId: this.get('user.id'),
                 startDate,
                 expirationDate,
                 debugLevelId: debugLevel.id,
