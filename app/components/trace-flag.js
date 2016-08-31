@@ -98,6 +98,7 @@ export default Ember.Component.extend({
                 debugLevel
             });
 
+            //NOTE: This "create" function is defined in the .hbs template that includes this trace-flag component.
             this.get('create')(newTraceFlag);
 
             newTraceFlag.save().then(result => {
@@ -131,6 +132,23 @@ export default Ember.Component.extend({
             }).catch(error => {
                 console.error(error);
                 notify.error('Unable to delete TraceFlag');
+            });
+        },
+
+        reloadTraceFlags() {
+
+            let notify = this.get('notify');
+            let refreshIcon = this.$('#TraceFlagReload');
+
+            refreshIcon.addClass('glyphicon-animate-spin-fast text-success');
+            let reloadPromise = this.get('reload')();
+
+            reloadPromise.then(() => {
+                notify.success('TraceFlags updated');
+            }).catch(error => {
+                notify.error(error.message);
+            }).finally(() => {
+                refreshIcon.removeClass('glyphicon-animate-spin-fast text-success');
             });
         },
 

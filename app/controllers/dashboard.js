@@ -2,6 +2,9 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
 
+    user: Ember.inject.service(),
+    notify: Ember.inject.service(),
+
     orgLimitUpdateCount: 0,
 
     //Our api adds an "id" property to the api versions response from Salesforce and we simply copy the version number
@@ -38,6 +41,21 @@ export default Ember.Controller.extend({
 
         onTraceFlagCreate() {
             this.set('model.traceFlags', this.store.peekAll('trace-flag'));
+        },
+
+        onTraceFlagReload() {
+
+            let user = this.get('user.id');
+
+            return this.store.query('trace-flag', { user }).then(traceFlags => {
+
+                traceFlags.forEach(flag => {
+                    let debugLevel = this.store.peekRecord('debug-level', flag.get('debugLevelId'));
+                    flag.set('debugLevel', debugLevel);
+                });
+
+                this.set('model.traceFlags', this.store.peekAll('trace-flag'));
+            });
         }
     }
 });

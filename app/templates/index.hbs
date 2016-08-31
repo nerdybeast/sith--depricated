@@ -1,8 +1,11 @@
-<div class="jumbotron">
-	<div class="container">
-		<h2>Salesforce Integration Testing Hut</h2>
-		<h4>Ha! I needed a name that produced the acronym SITH</h4>
-		<h4>Clicking the link below will open the Auth0 login window</h4>
-		<button class="btn btn-success" {{action 'login'}}>Login</button>
+{{#if isAuthenticating}}
+	{{page-loader message="Authenticating..."}}
+{{else}}
+	<div class="jumbotron">
+		<div class="container">
+			<h1>SITH <small>a salesforce app for developers</small></h1>
+			<h4>clicking this button will open the Auth0 login window</h4>
+			<button class="btn btn-success" {{action 'login'}}>Login</button>
+		</div>
 	</div>
-</div>
+{{/if}}
