@@ -35,7 +35,7 @@ let parseAuth = function(auth, action) {
 	//NOTE: This function has to return an Ember Promise, simply returning a jquery promise doesn't seem to update the auth session properly.
 	return new Ember.RSVP.Promise(resolve => {
 
-		if(auth.profile.instance_url && auth.profile.session_id) {
+		if(auth.profile.MODIFIED) {
 			return resolve(auth);
 		}
 
@@ -51,6 +51,7 @@ let parseAuth = function(auth, action) {
 
 			auth.profile.instance_url = result.instanceUrl;
 			auth.profile.session_id = result.sessionId;
+			auth.profile.MODIFIED = true;
 
 			console.info(`${LOG_TITLE} ${action} =>`, auth);
 

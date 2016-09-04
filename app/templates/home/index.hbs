@@ -7,11 +7,19 @@
 </div>
 <br />
 <div class="panel panel-default">
-    <div class="panel-heading">
+    <!-- <div class="panel-heading">
         Test Classes Containing Apex Analytics
         <button class="btn btn-success" {{action "startTestRun"}}>Run</button>
         {{if loadingTestRun " loading..."}}
-    </div>
+    </div> -->
+    {{#bootstrap/panel-heading primary="Test Classes" secondary="containing apex analytics declarations"}}
+        {{#if isRunning}}
+            <div class="pull-right">
+                <span class="glyphicon glyphicon-refresh glyphicon-animate-spin text-success"></span>
+            </div>
+        {{/if}}
+    {{/bootstrap/panel-heading}}
+
     <ul class="list-group">
     {{#each testClasses as |class|}}
         <li class="list-group-item">
@@ -42,6 +50,13 @@
         </li>
     {{/each}}
     </ul>
+
+    <div class="panel-footer">
+        <div class="text-right">
+            {{bootstrap/action-button level="success" buttonText="Execute" action=(action "startTestRun")}}
+        </div>
+    </div>
+
 </div>
 
 {{outlet}}

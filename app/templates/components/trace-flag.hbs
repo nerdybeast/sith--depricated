@@ -1,8 +1,10 @@
 <div class="panel panel-default">
 
-    <div class="panel-heading">
-        <h4>Trace Flag <small><em>used for debug logs</em></small></h4>
-    </div>
+    {{#bootstrap/panel-heading primary="Trace Flags" secondary="used for debug logs"}}
+        <div class="pull-right">
+            <span {{action "reloadTraceFlags"}} id="TraceFlagReload" class="glyphicon glyphicon-refresh" data-toggle="tooltip" title="Refresh"></span>
+        </div>
+    {{/bootstrap/panel-heading}}
 
     <!-- Save this snippet for reference in case we decide to use it elsewhere in this app
     {{#if alert}}
@@ -35,7 +37,7 @@
                         <span data-toggle="tooltip" data-placement="right" data-html="true" title={{traceFlag.loggingLevelsHtml}}>{{traceFlag.debugLevel.developerName}}</span>
                     </td>
                     <td>{{moment-date traceFlag.expirationDate "lll"}}</td>
-                    <td>
+                    <td class="text-center">
                         <div class="btn-group btn-group-xs" role="group">
                             <button {{action "updateTraceFlag" traceFlag 3}} type="button" class="btn btn-default">3 hrs</button>
                             <button {{action "updateTraceFlag" traceFlag 6}} type="button" class="btn btn-default">6 hrs</button>

@@ -1,6 +1,3 @@
-<!--Direct access of a controller proeprty-->
-<div>Current Org Api Version: {{currentMaxOrgVersion}} (lowest supported version is {{currentMinOrgVersion}})</div>
-
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12 col-md-12 col-lg-6">
@@ -8,7 +5,8 @@
             {{org-limit-watch model=model.orgLimits update=(action "updateOrgApiLimits")}}
         </div>
         <div class="col-sm-12 col-md-12 col-lg-6">
-            {{trace-flag model=model.traceFlags create=(action "onTraceFlagCreate")}}
+            {{org-version apiVersions=model.apiVersions classes=model.classes}}
+            {{trace-flag model=model.traceFlags create=(action "onTraceFlagCreate") reload=(action "onTraceFlagReload")}}
         </div>
     </div>
 </div>

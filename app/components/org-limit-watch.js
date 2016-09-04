@@ -3,12 +3,10 @@ import config from 'sith/config/environment';
 
 export default Ember.Component.extend({
 
-    session: Ember.inject.service(),
+    user: Ember.inject.service(),
 
     //Inject the socket.io service into this controller.
     io: Ember.inject.service('socket-io'),
-
-    profile: Ember.computed.alias('session.data.authenticated.profile'),
 
     //
     mainSocket: Ember.computed('io', function() {
@@ -41,7 +39,7 @@ export default Ember.Component.extend({
 
             if(!this.get('dashboardSocket')) {
 
-                mainSocket.emit('initialize-dashboard', this.get('profile'), (socketNamespace) => {
+                mainSocket.emit('initialize-dashboard', this.get('user.profile'), (socketNamespace) => {
 
                     console.info('initialize-dashboard response =>', socketNamespace);
 
@@ -99,6 +97,6 @@ export default Ember.Component.extend({
 
     dashboardReconnect() {
         this.set('socketStatus', 'connected');
-        this.get('mainSocket').emit('initialize-dashboard', this.get('profile'));
+        this.get('mainSocket').emit('initialize-dashboard', this.get('user.profile'));
     }
 });

@@ -5,8 +5,9 @@ const apiDomain = config.APP.apiDomain;
 
 export default Ember.Controller.extend({
 
-    //Inject the socket.io service into this controller.
     io: Ember.inject.service('socket-io'),
+    user: Ember.inject.service(),
+    notify: Ember.inject.service(),
 
     //Inject the controllers/home.js into this controller.
     homeController: Ember.inject.controller('home'),
@@ -17,6 +18,24 @@ export default Ember.Controller.extend({
 
         //Because our socket is running on the same server as our api, we only need to provide the domain and socket.io figures out the rest.
         return this.get('io').socketFor(`${apiDomain}/`);
+    }),
+
+    //A simple filter to show all test classes.
+    testClasses: Ember.computed.filterBy('model.classes', 'isTestClass', true),
+
+    //A simple filter that holds all of the classes that have been selected for a test run.
+    selectedForTestRun: Ember.computed.filterBy('model.classes', 'selected', true),
+
+    //
+    loadingTestRun: false,
+
+    //Will hold the AsyncApexJob record for the current test run. This will be observed to give the user visual cues about the test run.
+    currentAsyncApexJob: null,
+
+    isRunning: Ember.computed('currentAsyncApexJob.status', function() {
+        let currentAsyncApexJob = this.get('currentAsyncApexJob');
+        if(!currentAsyncApexJob) { return false; }
+        return currentAsyncApexJob.get('status') !== 'Completed';
     }),
 
 	//Default ember hook that we are overriding to instantiate sokct.io
@@ -54,77 +73,87 @@ export default Ember.Controller.extend({
         socket.off('analytics', this.onAnalytics);
     },
 
-    //A simple filter to show all test classes.
-    testClasses: Ember.computed.filterBy('model.classes', 'isTestClass', true),
-
-    //A simple filter that holds all of the classes that have been selected for a test run.
-    selectedForTestRun: Ember.computed.filterBy('model.classes', 'selected', true),
-
-    //
-    loadingTestRun: false,
-
     actions: {
 
         startTestRun() {
-            console.info('Classes selected:', this.get('selectedForTestRun'));
 
             let classes = this.get('selectedForTestRun');
 
             if(classes.length === 0) {
-                return;
+                return Ember.RSVP.reject(['no classes have been selected']);
             }
 
-            let data = {
+            return new Ember.RSVP.Promise((resolve, reject) => {
 
-                userId: this.get('homeController.profile.user_id'),
-
-                //Extract an array of just the ids for the classes that have been selected.
-                classIds: classes.mapBy('id')
-            };
-
-            this.toggleProperty('loadingTestRun');
-
-            Ember.$.ajax({
-                method: 'POST',
-                url: `${config.APP.apiDomain}/api/run-tests`,
-                headers: {
-
-                    //Tell the api that we want a json api doc response instead of a traditional json response.
-                    'Accept': 'application/vnd.api+json',
-
-                    //Tell the api that we are sending standard json in the body of this request.
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify({ data })
-            }).done((response) => {
-
-                /**
-                 * Using .pushPayload() here instead of .push() because the response here is in a traditional json api doc format and the push method
-                 * requires data to be in a slightly altered format. pushPayload here will use the default application serializer (serializers/application.js)
-                 * to put this data in the store without having to manipulate here on the fly or change our api to return a non-standard json api doc.
-                 */
-                this.store.pushPayload(response);
-
-                /**
-                 * TODO: Need to rethink how to create these relationships without looping through ALL the records in the store.
-                 * This is really inefficient and could be cleaned up.
-                 */
-                this.store.peekAll('apex-test-queue-item').forEach(record => {
-
-                    record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
-
-                    //This async-apex-job record will have just been loaded into the store in the .pushPayload() call above.
-                    record.set('parentJob', this.store.peekRecord('async-apex-job', record.get('parentJobId')));
-                });
-
-                this.store.peekAll('async-apex-job').forEach(record => {
-                    record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
-                });
-
-            }).fail((data) => {
-                console.error(data);
-            }).always(() => {
                 this.toggleProperty('loadingTestRun');
+
+                let options = {
+                    method: 'POST',
+                    url: `${config.APP.apiDomain}/api/run-tests`,
+                    headers: {
+
+                        //Tell the api that we want a json api doc response instead of a traditional json response.
+                        'Accept': 'application/vnd.api+json',
+
+                        //Tell the api that we are sending standard json in the body of this request.
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify({
+                        data: {
+
+                            userId: this.get('user.id'),
+
+                            //Extract an array of just the ids for the classes that have been selected.
+                            classIds: classes.mapBy('id')
+                        }
+                    })
+                };
+
+                Ember.$.ajax(options).done((response) => {
+
+                    /**
+                     * Using .pushPayload() here instead of .push() because the response here is in a traditional json api doc format and the push method
+                     * requires data to be in a slightly altered format. pushPayload here will use the default application serializer (serializers/application.js)
+                     * to put this data in the store without having to manipulate here on the fly or change our api to return a non-standard json api doc.
+                     */
+                    this.store.pushPayload(response);
+
+                    let asyncApexJobId = response.data.findBy('type', 'async-apex-job').id;
+                    this.set('currentAsyncApexJob', this.store.peekRecord('async-apex-job', asyncApexJobId));
+
+                    /**
+                     * TODO: Need to rethink how to create these relationships without looping through ALL the records in the store.
+                     * This is really inefficient and could be cleaned up.
+                     */
+                    this.store.peekAll('apex-test-queue-item').forEach(record => {
+
+                        record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+
+                        //This async-apex-job record will have just been loaded into the store in the .pushPayload() call above.
+                        record.set('parentJob', this.store.peekRecord('async-apex-job', record.get('parentJobId')));
+                    });
+
+                    this.store.peekAll('async-apex-job').forEach(record => {
+                        record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+                    });
+
+                    return resolve('test execution has started');
+
+                }).fail(error => {
+
+                    console.error(error);
+                    let errors = JSON.parse(error.responseText).errors.map(error => {
+                        return `
+                            <h5>${error.title}</h5>
+                            - ${error.detail}
+                        `;
+                    });
+
+                    return reject(errors);
+
+                }).always(() => {
+                    this.toggleProperty('loadingTestRun');
+                });
             });
         },
 

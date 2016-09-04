@@ -2,19 +2,10 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
 
-    session: Ember.inject.service(),
+    user: Ember.inject.service(),
+    notify: Ember.inject.service(),
 
     orgLimitUpdateCount: 0,
-
-    //Our api adds an "id" property to the api versions response from Salesforce and we simply copy the version number
-    //to the id field (this makes ember data happy) and we get an integer value for the version instead of a string value returned by salesforce.
-    orgVersions: Ember.computed.mapBy('model.apiVersions', 'id'),
-
-    //"orgVersions" will be an array of integers, this simply grabs the largest one.
-    currentMaxOrgVersion: Ember.computed.max('orgVersions'),
-
-    //"orgVersions" will be an array of integers, this simply grabs the smallest one.
-    currentMinOrgVersion: Ember.computed.min('orgVersions'),
 
     actions: {
 
@@ -40,6 +31,23 @@ export default Ember.Controller.extend({
 
         onTraceFlagCreate() {
             this.set('model.traceFlags', this.store.peekAll('trace-flag'));
+        },
+
+        onTraceFlagReload() {
+
+            let user = this.get('user.id');
+
+            return this.store.query('trace-flag', { user }).then(traceFlags => {
+
+                traceFlags.forEach(flag => {
+                    let debugLevel = this.store.peekRecord('debug-level', flag.get('debugLevelId'));
+                    flag.set('debugLevel', debugLevel);
+                });
+
+                this.set('model.traceFlags', this.store.peekAll('trace-flag'));
+
+                return traceFlags;
+            });
         }
     }
 });
