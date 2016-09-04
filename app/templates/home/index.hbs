@@ -53,7 +53,7 @@
 
     <div class="panel-footer">
         <div class="text-right">
-            <button class="btn btn-success" {{action "startTestRun"}}>Execute</button>
+            {{bootstrap/action-button level="success" buttonText="Execute" action=(action "startTestRun")}}
         </div>
     </div>
 

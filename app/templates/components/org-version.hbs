@@ -11,7 +11,8 @@
                         <strong>Current</strong>
                     </div>
                     <div class="panel-body">
-                        <div style="font-size:4em;">{{max}}</div>
+                        <div style="font-size:4em;">{{currentMaxOrgVersion}}</div>
+                        <small>{{classesAtMaxApiVersion.length}} classes at this version</small>
                     </div>
                 </div>
             </div>
@@ -21,7 +22,8 @@
                         <strong>Lowest Supported</strong>
                     </div>
                     <div class="panel-body">
-                        <div style="font-size:4em;">{{min}}</div>
+                        <div style="font-size:4em;">{{currentMinOrgVersion}}</div>
+                        <small>{{classesBelowMinApiVersion.length}} classes at or below</small>
                     </div>
                 </div>
             </div>

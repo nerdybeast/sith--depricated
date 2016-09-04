@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import DS from 'ember-data';
 
 export default DS.Model.extend({
@@ -17,5 +18,11 @@ export default DS.Model.extend({
     developerName: DS.attr('string'),
     masterLabel: DS.attr('string'),
 
-    traceFlags: DS.hasMany('trace-flag')
+    traceFlags: DS.hasMany('trace-flag'),
+
+    levels: Ember.computed(function() {
+        return Ember.A(['apexCode', 'apexProfiling', 'callout', 'database', 'validation', 'visualforce', 'workflow', 'system']).map(level => {
+            return { name: level, title: level.capitalize() };
+        });
+    })
 });

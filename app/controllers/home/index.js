@@ -76,87 +76,84 @@ export default Ember.Controller.extend({
     actions: {
 
         startTestRun() {
-            console.info('Classes selected:', this.get('selectedForTestRun'));
 
-            let notify = this.get('notify');
             let classes = this.get('selectedForTestRun');
 
             if(classes.length === 0) {
-                notify.error('No classes have been selected');
-                return;
+                return Ember.RSVP.reject(['no classes have been selected']);
             }
 
-            this.toggleProperty('loadingTestRun');
+            return new Ember.RSVP.Promise((resolve, reject) => {
 
-            let options = {
-                method: 'POST',
-                url: `${config.APP.apiDomain}/api/run-tests`,
-                headers: {
+                this.toggleProperty('loadingTestRun');
 
-                    //Tell the api that we want a json api doc response instead of a traditional json response.
-                    'Accept': 'application/vnd.api+json',
+                let options = {
+                    method: 'POST',
+                    url: `${config.APP.apiDomain}/api/run-tests`,
+                    headers: {
 
-                    //Tell the api that we are sending standard json in the body of this request.
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify({
-                    data: {
+                        //Tell the api that we want a json api doc response instead of a traditional json response.
+                        'Accept': 'application/vnd.api+json',
 
-                        userId: this.get('user.id'),
+                        //Tell the api that we are sending standard json in the body of this request.
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify({
+                        data: {
 
-                        //Extract an array of just the ids for the classes that have been selected.
-                        classIds: classes.mapBy('id')
-                    }
-                })
-            };
+                            userId: this.get('user.id'),
 
-            Ember.$.ajax(options).done((response) => {
+                            //Extract an array of just the ids for the classes that have been selected.
+                            classIds: classes.mapBy('id')
+                        }
+                    })
+                };
 
-                notify.success('Test execution has started');
+                Ember.$.ajax(options).done((response) => {
 
-                /**
-                 * Using .pushPayload() here instead of .push() because the response here is in a traditional json api doc format and the push method
-                 * requires data to be in a slightly altered format. pushPayload here will use the default application serializer (serializers/application.js)
-                 * to put this data in the store without having to manipulate here on the fly or change our api to return a non-standard json api doc.
-                 */
-                this.store.pushPayload(response);
+                    /**
+                     * Using .pushPayload() here instead of .push() because the response here is in a traditional json api doc format and the push method
+                     * requires data to be in a slightly altered format. pushPayload here will use the default application serializer (serializers/application.js)
+                     * to put this data in the store without having to manipulate here on the fly or change our api to return a non-standard json api doc.
+                     */
+                    this.store.pushPayload(response);
 
-                let asyncApexJobId = response.data.findBy('type', 'async-apex-job').id;
-                this.set('currentAsyncApexJob', this.store.peekRecord('async-apex-job', asyncApexJobId));
+                    let asyncApexJobId = response.data.findBy('type', 'async-apex-job').id;
+                    this.set('currentAsyncApexJob', this.store.peekRecord('async-apex-job', asyncApexJobId));
 
-                /**
-                 * TODO: Need to rethink how to create these relationships without looping through ALL the records in the store.
-                 * This is really inefficient and could be cleaned up.
-                 */
-                this.store.peekAll('apex-test-queue-item').forEach(record => {
+                    /**
+                     * TODO: Need to rethink how to create these relationships without looping through ALL the records in the store.
+                     * This is really inefficient and could be cleaned up.
+                     */
+                    this.store.peekAll('apex-test-queue-item').forEach(record => {
 
-                    record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+                        record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
 
-                    //This async-apex-job record will have just been loaded into the store in the .pushPayload() call above.
-                    record.set('parentJob', this.store.peekRecord('async-apex-job', record.get('parentJobId')));
-                });
+                        //This async-apex-job record will have just been loaded into the store in the .pushPayload() call above.
+                        record.set('parentJob', this.store.peekRecord('async-apex-job', record.get('parentJobId')));
+                    });
 
-                this.store.peekAll('async-apex-job').forEach(record => {
-                    record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
-                });
+                    this.store.peekAll('async-apex-job').forEach(record => {
+                        record.set('apexClass', this.store.peekRecord('class', record.get('apexClassId')));
+                    });
 
-            }).fail(error => {
+                    return resolve('test execution has started');
 
-                console.error(error);
-                let errorsArray = JSON.parse(error.responseText).errors;
+                }).fail(error => {
 
-                errorsArray.forEach(error => {
-                    notify.error({
-                        html: `
+                    console.error(error);
+                    let errors = JSON.parse(error.responseText).errors.map(error => {
+                        return `
                             <h5>${error.title}</h5>
                             - ${error.detail}
-                        `,
-                        closeAfter: 7500
+                        `;
                     });
-                });
 
-            }).always(() => {
-                this.toggleProperty('loadingTestRun');
+                    return reject(errors);
+
+                }).always(() => {
+                    this.toggleProperty('loadingTestRun');
+                });
             });
         },
 

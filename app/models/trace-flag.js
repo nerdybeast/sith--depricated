@@ -27,31 +27,15 @@ export default DS.Model.extend({
 
     debugLevel: DS.belongsTo('debug-level'),
 
-    //TODO: Make this dynamic, possibly with another component...
     loggingLevelsHtml: Ember.computed('debugLevel', function() {
         let debugLevel = this.get('debugLevel');
-        return `
-            <div class="row">
-                <div class="col-xs-6">ApexCode: </div><div class="col-xs-6">${debugLevel.get('apexCode')}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">ApexProfiling: </div><div class="col-xs-6">${debugLevel.get('apexProfiling')}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">Callout: </div><div class="col-xs-6">${debugLevel.get('callout')}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">Database: </div><div class="col-xs-6">${debugLevel.get('database')}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">Validation: </div><div class="col-xs-6">${debugLevel.get('validation')}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">Workflow: </div><div class="col-xs-6">${debugLevel.get('workflow')}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">System: </div><div class="col-xs-6">${debugLevel.get('system')}</div>
-            </div>
-        `;
+        return debugLevel.get('levels').map(level => {
+            return `
+                <div class="row">
+                    <div class="col-xs-6">${level.title}: </div>
+                    <div class="col-xs-6">${debugLevel.get(level.name)}</div>
+                </div>
+            `;
+        }).join('');
     })
 });

@@ -1,0 +1,12 @@
+{{#if disabled}}
+    <span class="glyphicon glyphicon-refresh glyphicon-animate-spin-fast" style="margin-right:.5em;"></span>
+    {{pendingText}}
+{{else}}
+
+    <!-- https://guides.emberjs.com/v2.7.0/components/block-params/#toc_supporting-both-block-and-non-block-component-usage-in-one-template -->
+    {{#if hasBlock}}
+        {{yield}}
+    {{else}}
+        {{buttonText}}
+    {{/if}}
+{{/if}}

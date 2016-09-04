@@ -12,10 +12,11 @@ export default Ember.Route.extend(AuthenticatedRouteMixin, {
 
         let apiVersions = this.store.findAll('org-api-version');
         let debugLevels = this.store.findAll('debug-level');
+        let classes = this.store.findAll('class');
         let dashboard = Ember.$.getJSON(`${config.APP.apiDomain}/api/dashboard`);
         let traceFlags = this.store.query('trace-flag', { user });
 
-        return Ember.RSVP.hash({ apiVersions, debugLevels, dashboard, traceFlags }).then((hash) => {
+        return Ember.RSVP.hash({ apiVersions, debugLevels, classes, dashboard, traceFlags }).then((hash) => {
 
             //Turn the orgLimits property into an Ember Object so that we can observe changes.
             hash.orgLimits = Ember.Object.create(hash.dashboard.orgLimits);
