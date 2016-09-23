@@ -5,8 +5,5 @@
 
     Setting `disableAnalytics` to true will prevent any data from being sent.
   */
-  "disableAnalytics": true,
-  
-  /** Turning off live reload as it seems to not be working on Windows. */
-  "liveReload": false
+  "disableAnalytics": true
 }
