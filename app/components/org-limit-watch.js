@@ -61,12 +61,6 @@ export default Ember.Component.extend({
         mainSocket.on('reconnect_error', (error) => console.error(`mainSocket unable to reconnect => ${error.message}`));
 	},
 
-    //Default Ember hook
-    willDestroyElement() {
-        let dashboardSocket = this.get('dashboardSocket');
-        dashboardSocket.off('org-limits-update', this.orgLimitsUpdate);
-    },
-
     modelPretty: Ember.computed('model', function() {
 
         let data = [];
