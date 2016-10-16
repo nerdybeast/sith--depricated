@@ -39,7 +39,7 @@ export default Ember.Component.extend({
 
             if(!this.get('dashboardSocket')) {
 
-                mainSocket.emit('initialize-dashboard', this.get('user.profile'), (socketNamespace) => {
+                mainSocket.emit('initialize-dashboard', this.get('user.socketProfile'), (socketNamespace) => {
 
                     console.info('initialize-dashboard response =>', socketNamespace);
 
@@ -60,12 +60,6 @@ export default Ember.Component.extend({
         mainSocket.on('reconnect', (attemptCount) => console.info(`mainSocket reconnected on attempt number ${attemptCount}`));
         mainSocket.on('reconnect_error', (error) => console.error(`mainSocket unable to reconnect => ${error.message}`));
 	},
-
-    //Default Ember hook
-    willDestroyElement() {
-        let dashboardSocket = this.get('dashboardSocket');
-        dashboardSocket.off('org-limits-update', this.orgLimitsUpdate);
-    },
 
     modelPretty: Ember.computed('model', function() {
 

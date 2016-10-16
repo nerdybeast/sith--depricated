@@ -6,7 +6,7 @@
         </div>
         <div class="col-sm-12 col-md-12 col-lg-6">
             {{org-version apiVersions=model.apiVersions classes=model.classes}}
-            {{trace-flag model=model.traceFlags create=(action "onTraceFlagCreate") reload=(action "onTraceFlagReload")}}
+            {{trace-flag model=model.traceFlags create=(action "onTraceFlagCreate") update=(action "onTraceFlagUpdate") reload=(action "onTraceFlagReload")}}
         </div>
     </div>
 </div>
