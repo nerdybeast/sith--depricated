@@ -31,7 +31,19 @@ export default Ember.Component.extend({
         this._super(...arguments);
 
         let io = this.get('io').socketFor(`${config.APP.apiDomain}/`);
-        io.on('sobject-update', this.sobjectUpdate, this);
+
+        io.on('connect', () => {
+
+            console.log('io.on(connect) fired in trace-flag component');
+
+            io.emit('initialize-traceflag-tracking', this.get('user.socketProfile'), (socketNamespace) => {
+
+                console.log(`trace-flag component socketNamespace => ${socketNamespace}`);
+
+                let traceFlagSocket = this.get('io').socketFor(`${config.APP.apiDomain}/${socketNamespace}`);
+                traceFlagSocket.on('trace-flag-update', this.onTraceFlagUpdate, this);
+            });
+        });
     },
 
     //DEFAULT EMBER HOOK
@@ -58,20 +70,10 @@ export default Ember.Component.extend({
         this.$('[data-toggle="tooltip"]').tooltip('destroy');
     },
 
-    sobjectUpdate(message) {
-
-        let store = this.get('store');
-        let notify = this.get('notify');
-
-        let sobjectType = message.type.dasherize();
-
-        if(message.action === 'delete') {
-            let sobject = store.peekRecord(sobjectType, message.id);
-            if(sobject) {
-                store.unloadRecord(sobject);
-                notify.success('trace flag was deleted in the current org');
-            }
-        }
+    //Fired by socket-io.
+    onTraceFlagUpdate(traceFlags) {
+        //See the hbs template where each trace-flag component is defined to see what parent action 'update' is bound to.
+        this.get('update')(traceFlags);
     },
 
     actions: {
@@ -177,7 +179,7 @@ export default Ember.Component.extend({
                 return;
             }
 
-            //Will send a delete request to the server.
+            //Will send a delete request to the server and automatically update the store.
             traceFlag.destroyRecord().then(result => {
                 console.info('delete result', result);
                 notify.success('trace flag successfully deleted');

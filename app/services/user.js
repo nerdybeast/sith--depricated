@@ -11,6 +11,11 @@ export default Ember.Service.extend({
     }),
 
     sessionId: Ember.computed.alias('profile.session_id'),
+    instanceUrl: Ember.computed.alias('profile.instance_url'),
     username: Ember.computed.alias('profile.username'),
-    orgId: Ember.computed.alias('profile.organization_id')
+    orgId: Ember.computed.alias('profile.organization_id'),
+
+    socketProfile: Ember.computed('id', 'sessionId', 'instanceUrl', 'username', 'orgId', function() {
+        return this.getProperties('id', 'sessionId', 'instanceUrl', 'username', 'orgId');
+    })
 });

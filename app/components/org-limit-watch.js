@@ -39,7 +39,7 @@ export default Ember.Component.extend({
 
             if(!this.get('dashboardSocket')) {
 
-                mainSocket.emit('initialize-dashboard', this.get('user.profile'), (socketNamespace) => {
+                mainSocket.emit('initialize-dashboard', this.get('user.socketProfile'), (socketNamespace) => {
 
                     console.info('initialize-dashboard response =>', socketNamespace);
 
