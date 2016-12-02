@@ -1,39 +1,29 @@
 /* jshint node: true */
 
 module.exports = function(environment) {
+    var ENV = {
+        modulePrefix: 'sith',
+        environment: environment,
+        rootURL: '/',
+        locationType: 'auto',
+        EmberENV: {
+            FEATURES: {
+                // Here you can enable experimental features on an ember canary build
+                // e.g. 'with-controller': true
+            },
+            EXTEND_PROTOTYPES: {
+                // Prevent Ember Data from overriding Date.parse.
+                Date: false
+            }
+        },
 
-	var ENV = {
-		modulePrefix: 'sith',
-		environment: environment,
-		baseURL: '/',
-		locationType: 'auto',
-		EmberENV: {
-			FEATURES: {
-				// Here you can enable experimental features on an ember canary build
-				// e.g. 'with-controller': true
-			}
-		},
+        APP: {
+            // Here you can pass flags/options to your application instance
+            // when it is created
+        }
+    };
 
-		APP: {
-
-			//Will point to the domain for the api backing this app.
-			apiDomain: null
-		}
-	};
-
-	if (environment === 'test') {
-		// Testem prefers this...
-		ENV.baseURL = '/';
-		ENV.locationType = 'none';
-
-		// keep test console output quieter
-		ENV.APP.LOG_ACTIVE_GENERATION = false;
-		ENV.APP.LOG_VIEW_LOOKUPS = false;
-
-		ENV.APP.rootElement = '#ember-testing';
-	}
-
-	if(environment === 'localhost' || environment === 'local') {
+    if(environment === 'localhost' || environment === 'local') {
 
 		//ENV.APP.LOG_RESOLVER = true;
 		ENV.APP.LOG_ACTIVE_GENERATION = true;
@@ -44,19 +34,31 @@ module.exports = function(environment) {
 		ENV.APP.apiDomain = 'http://localhost:5000';
 	}
 
-	if (environment === 'development') {
+	if(environment === 'development') {
 		ENV.APP.apiDomain = 'https://sith-apprentice-api.herokuapp.com';
 	}
 
-	if (environment === 'staging') {
+	if(environment === 'staging') {
 		ENV.APP.apiDomain = 'https://sith-lord-api.herokuapp.com';
 	}
 
-	if (environment === 'production') {
+	if(environment === 'production') {
 		ENV.APP.apiDomain = 'https://sith-api.herokuapp.com';
 	}
 
-	//START => Auth0 options
+    if(environment === 'test') {
+
+        // Testem prefers this...
+        ENV.locationType = 'none';
+
+        // keep test console output quieter
+        ENV.APP.LOG_ACTIVE_GENERATION = false;
+        ENV.APP.LOG_VIEW_LOOKUPS = false;
+
+        ENV.APP.rootElement = '#ember-testing';
+    }
+
+    //START => Auth0 options
 	//See: https://github.com/auth0/auth0-ember-simple-auth/blob/master/README.md
 	ENV['ember-simple-auth'] = {
 		authenticationRoute: 'index',
@@ -81,5 +83,5 @@ module.exports = function(environment) {
   	};
   	//END => Auth0 options
 
-	return ENV;
+    return ENV;
 };

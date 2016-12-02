@@ -1,10 +1,13 @@
-/* jshint node:true */
-var EmberApp = require('ember-cli/lib/broccoli/ember-app');
-var Funnel = require('broccoli-funnel');
+'use strict';
+
+/*jshint node:true*/
+/* global require, module */
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const Funnel = require('broccoli-funnel');
 
 module.exports = function(defaults) {
 
-	var app = new EmberApp(defaults, {
+    let app = new EmberApp(defaults, {
 
 		/**
 		 * We are using an ember addon called "ember-cli-dotenv" that is an ember-friendly version of the
@@ -46,7 +49,7 @@ module.exports = function(defaults) {
 	app.import('vendor/clipboard-setup.js');
 
 	//Pull the entire Bootstrap fonts directory into the app.
-	var bootstrapFonts = new Funnel('bower_components/bootstrap/dist/fonts', {
+	let bootstrapFonts = new Funnel('bower_components/bootstrap/dist/fonts', {
 		destDir: '/fonts'
 	});
 
